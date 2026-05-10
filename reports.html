@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Reports — DCMS</title>
+  <link rel="stylesheet" href="styles/main.css"/>
+  <link rel="stylesheet" href="styles/animations.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    .rpt-layout{max-width:1100px;margin:0 auto;padding:110px 24px 80px;}
+    .tabs{display:flex;gap:4px;border-bottom:1px solid var(--border);margin-bottom:36px;overflow-x:auto;}
+    .tab{padding:10px 20px;font-size:.9rem;font-weight:500;color:var(--text-m);border-bottom:2px solid transparent;cursor:pointer;transition:color .2s,border-color .2s;white-space:nowrap;}
+    .tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+    .tab-panel{display:none;animation:fadeIn .3s ease;}
+    .tab-panel.active{display:block;}
+    .kpi4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px;}
+    .kpi4 .k{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-l);padding:22px 20px;}
+    .k-val{font-family:var(--font-h);font-size:2rem;margin-bottom:4px;}
+    .k-lbl{font-size:.78rem;color:var(--text-d);}
+    .k-chg{font-size:.78rem;margin-top:4px;}
+    .card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-l);padding:24px;margin-bottom:20px;}
+    .card h3{font-family:var(--font-h);font-size:1.05rem;margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+    .bar-row{display:flex;align-items:center;gap:12px;margin-bottom:10px;font-size:.88rem;}
+    .bar-label{width:140px;flex-shrink:0;color:var(--text-m);}
+    .bar-track{flex:1;height:8px;background:var(--bg-card2);border-radius:4px;overflow:hidden;}
+    .bar-fill{height:100%;border-radius:4px;transition:width 1s ease;}
+    .bar-val{width:40px;text-align:right;color:var(--text-d);font-family:var(--font-m);font-size:.8rem;}
+    .two-col{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+    .tbl{width:100%;border-collapse:collapse;font-size:.88rem;}
+    .tbl th{padding:10px 14px;text-align:left;font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-d);border-bottom:1px solid var(--border);}
+    .tbl td{padding:12px 14px;border-bottom:1px solid rgba(30,43,66,.35);color:var(--text-m);}
+    .tbl tr:last-child td{border-bottom:none;}
+    .tbl td:first-child{color:var(--text);font-weight:500;}
+    .trend-dots{display:flex;align-items:flex-end;gap:8px;height:80px;margin-top:12px;}
+    .trend-bar{flex:1;border-radius:4px 4px 0 0;background:var(--accent);opacity:.7;transition:opacity .2s;min-width:0;}
+    .trend-bar:hover{opacity:1;}
+    .trend-labels{display:flex;gap:8px;margin-top:6px;}
+    .trend-lbl{flex:1;font-size:.65rem;color:var(--text-d);text-align:center;}
+    .rating-row{display:flex;align-items:center;gap:14px;margin-bottom:10px;}
+    .rating-stars{color:var(--gold);font-size:.9rem;letter-spacing:2px;}
+    @media(max-width:900px){.kpi4{grid-template-columns:1fr 1fr;}.two-col{grid-template-columns:1fr;}}
+    @media(max-width:600px){.kpi4{grid-template-columns:1fr;}}
+  </style>
+</head>
+<body>
+  <nav class="navbar" id="navbar">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-brand"><span class="brand-icon">⬡</span><span class="brand-text">DCMS</span></a>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="dashboard.html">Dashboard</a></li>
+        <li><a href="file-complaint.html">File Complaint</a></li>
+        <li><a href="track.html">Track</a></li>
+        <li><a href="reports.html" class="active">Reports</a></li>
+      </ul>
+      <div class="nav-actions">
+        <a href="login.html" class="btn-ghost">Sign In</a>
+        <a href="register.html" class="btn-primary">Register</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="rpt-layout">
+    <div style="margin-bottom:10px;"><span class="section-tag">Analytics &amp; Insights</span></div>
+    <h1 class="page-title">Reports &amp; Performance</h1>
+    <p class="page-desc" style="margin-bottom:32px;">Track complaint volumes, resolution rates, department efficiency, and citizen satisfaction across all categories.</p>
+
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab(this,'overview')">📊 Overview</div>
+      <div class="tab" onclick="switchTab(this,'complaints')">📝 Complaint Analytics</div>
+      <div class="tab" onclick="switchTab(this,'departments')">🏢 Department Performance</div>
+      <div class="tab" onclick="switchTab(this,'trends')">📈 Monthly Trends</div>
+      <div class="tab" onclick="switchTab(this,'feedback')">⭐ Citizen Feedback</div>
+    </div>
+
+    <!-- ── OVERVIEW ── -->
+    <div class="tab-panel active" id="tab-overview">
+      <div class="kpi4">
+        <div class="k reveal"><div class="k-val" style="color:var(--accent);">29.23L</div><div class="k-lbl">Grievances Received · 2024</div><div class="k-chg" style="color:var(--green);">↑ 11.7% vs 2023 (CPGRAMS)</div></div>
+        <div class="k reveal reveal-d1"><div class="k-val" style="color:var(--green);">90.5%</div><div class="k-lbl">Redressal Rate</div><div class="k-chg" style="color:var(--green);">Annual all-time high · DARPG</div></div>
+        <div class="k reveal reveal-d2"><div class="k-val" style="color:var(--gold);">15 days</div><div class="k-lbl">Avg. Disposal Time</div><div class="k-chg" style="color:var(--green);">↓ from 16 days in 2023</div></div>
+        <div class="k reveal reveal-d3"><div class="k-val" style="color:var(--accent-s);">92</div><div class="k-lbl">Ministries / Depts.</div><div class="k-chg" style="color:var(--text-d);">+ 36 States/UTs · 1L+ GROs</div></div>
+      </div>
+
+      <div class="two-col">
+        <div class="card reveal">
+          <h3>Complaints by Status</h3>
+          <div class="bar-row"><span class="bar-label">Resolved</span><div class="bar-track"><div class="bar-fill" style="width:90.5%;background:var(--green);"></div></div><span class="bar-val">26.46L</span></div>
+          <div class="bar-row"><span class="bar-label">In Progress</span><div class="bar-track"><div class="bar-fill" style="width:5%;background:var(--accent);"></div></div><span class="bar-val">~1.4L</span></div>
+          <div class="bar-row"><span class="bar-label">Open / Pending</span><div class="bar-track"><div class="bar-fill" style="width:3%;background:var(--yellow);"></div></div><span class="bar-val">~0.9L</span></div>
+          <div class="bar-row"><span class="bar-label">Escalated</span><div class="bar-track"><div class="bar-fill" style="width:1.5%;background:var(--red);"></div></div><span class="bar-val">~0.4L</span></div>
+        </div>
+        <div class="card reveal reveal-d1">
+          <h3>Top Categories This Month</h3>
+          <div class="bar-row"><span class="bar-label">Roads &amp; Transport</span><div class="bar-track"><div class="bar-fill" style="width:76%;background:var(--accent);"></div></div><span class="bar-val">26% · 7.6L</span></div>
+          <div class="bar-row"><span class="bar-label">Water Supply</span><div class="bar-track"><div class="bar-fill" style="width:61%;background:var(--accent-s);"></div></div><span class="bar-val">21% · 6.1L</span></div>
+          <div class="bar-row"><span class="bar-label">Sanitation</span><div class="bar-track"><div class="bar-fill" style="width:50%;background:var(--green);"></div></div><span class="bar-val">17% · 5.0L</span></div>
+          <div class="bar-row"><span class="bar-label">Electricity/Lights</span><div class="bar-track"><div class="bar-fill" style="width:41%;background:var(--gold);"></div></div><span class="bar-val">14% · 4.1L</span></div>
+          <div class="bar-row"><span class="bar-label">Billing &amp; Finance</span><div class="bar-track"><div class="bar-fill" style="width:26%;background:var(--yellow);"></div></div><span class="bar-val">9% · 2.6L</span></div>
+          <div class="bar-row"><span class="bar-label">Infrastructure</span><div class="bar-track"><div class="bar-fill" style="width:20%;background:var(--red);"></div></div><span class="bar-val">7% · 2.0L</span></div>
+        </div>
+      </div>
+
+      <div class="card reveal">
+        <h3>Monthly Complaint Volume — 2024</h3>
+        <div class="trend-dots" id="overviewTrend"></div>
+        <div class="trend-labels" id="overviewTrendLabels"></div>
+      </div>
+    </div>
+
+    <!-- ── COMPLAINT ANALYTICS ── -->
+    <div class="tab-panel" id="tab-complaints">
+      <div class="kpi4">
+        <div class="k reveal"><div class="k-val" style="color:var(--accent);" data-target="152">0</div><div class="k-lbl">Filed This Month</div></div>
+        <div class="k reveal reveal-d1"><div class="k-val" style="color:var(--green);" data-target="138">0</div><div class="k-lbl">Resolved This Month</div></div>
+        <div class="k reveal reveal-d2"><div class="k-val" style="color:var(--red);" data-target="12">0</div><div class="k-lbl">SLA Breaches</div></div>
+        <div class="k reveal reveal-d3"><div class="k-val" style="color:var(--yellow);" data-target="87">0</div><div class="k-lbl">Pending (Open+Progress)</div></div>
+      </div>
+      <div class="card reveal">
+        <h3>Complaints by Priority</h3>
+        <div class="bar-row"><span class="bar-label">🔴 High Priority</span><div class="bar-track"><div class="bar-fill" style="width:28%;background:var(--red);"></div></div><span class="bar-val">347</span></div>
+        <div class="bar-row"><span class="bar-label">🟡 Medium Priority</span><div class="bar-track"><div class="bar-fill" style="width:52%;background:var(--yellow);"></div></div><span class="bar-val">645</span></div>
+        <div class="bar-row"><span class="bar-label">🟢 Low Priority</span><div class="bar-track"><div class="bar-fill" style="width:20%;background:var(--green);"></div></div><span class="bar-val">248</span></div>
+      </div>
+      <div class="card reveal">
+        <h3>Recent Complaints Log</h3>
+        <table class="tbl">
+          <thead><tr><th>Complaint ID</th><th>Title</th><th>Category</th><th>Filed On</th><th>Priority</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td>#CMP-4912</td><td>Streetlight Failure — Zone 4</td><td>Infrastructure</td><td>Nov 8, 2024</td><td><span class="status-badge" style="background:rgba(248,113,113,.12);color:var(--red);border-color:rgba(248,113,113,.3);">High</span></td><td><span class="status-badge status-open">● Open</span></td></tr>
+            <tr><td>#CMP-4905</td><td>Road Pothole — Ring Road</td><td>Roads</td><td>Nov 7, 2024</td><td><span class="status-badge" style="background:rgba(248,113,113,.12);color:var(--red);border-color:rgba(248,113,113,.3);">High</span></td><td><span class="status-badge status-progress">◐ In Progress</span></td></tr>
+            <tr><td>#CMP-4899</td><td>Billing Discrepancy</td><td>Billing</td><td>Nov 6, 2024</td><td><span class="status-badge" style="background:rgba(251,191,36,.1);color:var(--yellow);border-color:rgba(251,191,36,.25);">Medium</span></td><td><span class="status-badge status-progress">◐ In Progress</span></td></tr>
+            <tr><td>#CMP-4893</td><td>Traffic Signal Malfunction</td><td>Roads</td><td>Nov 5, 2024</td><td><span class="status-badge" style="background:rgba(251,191,36,.1);color:var(--yellow);border-color:rgba(251,191,36,.25);">Medium</span></td><td><span class="status-badge status-progress">◐ In Progress</span></td></tr>
+            <tr><td>#CMP-4821</td><td>Road Damage — Main St.</td><td>Roads</td><td>Nov 2, 2024</td><td><span class="status-badge" style="background:rgba(52,211,153,.1);color:var(--green);border-color:rgba(52,211,153,.25);">Low</span></td><td><span class="status-badge status-resolved">✓ Resolved</span></td></tr>
+            <tr><td>#CMP-4800</td><td>Garbage Collection Missed</td><td>Sanitation</td><td>Oct 29, 2024</td><td><span class="status-badge" style="background:rgba(52,211,153,.1);color:var(--green);border-color:rgba(52,211,153,.25);">Low</span></td><td><span class="status-badge status-resolved">✓ Resolved</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── DEPARTMENT PERFORMANCE ── -->
+    <div class="tab-panel" id="tab-departments">
+      <div class="card reveal">
+        <h3>Department-wise Resolution Rate</h3>
+        <div class="bar-row"><span class="bar-label">Electricity/Lights</span><div class="bar-track"><div class="bar-fill" style="width:94%;background:var(--green);"></div></div><span class="bar-val">94%</span></div>
+        <div class="bar-row"><span class="bar-label">Sanitation</span><div class="bar-track"><div class="bar-fill" style="width:91%;background:var(--green);"></div></div><span class="bar-val">91%</span></div>
+        <div class="bar-row"><span class="bar-label">Water Supply</span><div class="bar-track"><div class="bar-fill" style="width:88%;background:var(--accent);"></div></div><span class="bar-val">88%</span></div>
+        <div class="bar-row"><span class="bar-label">Infrastructure</span><div class="bar-track"><div class="bar-fill" style="width:83%;background:var(--accent);"></div></div><span class="bar-val">83%</span></div>
+        <div class="bar-row"><span class="bar-label">Roads &amp; Transport</span><div class="bar-track"><div class="bar-fill" style="width:82%;background:var(--yellow);"></div></div><span class="bar-val">82%</span></div>
+        <div class="bar-row"><span class="bar-label">Billing &amp; Finance</span><div class="bar-track"><div class="bar-fill" style="width:79%;background:var(--yellow);"></div></div><span class="bar-val">79%</span></div>
+        <div class="bar-row"><span class="bar-label">Environment</span><div class="bar-track"><div class="bar-fill" style="width:76%;background:var(--red);"></div></div><span class="bar-val">76%</span></div>
+      </div>
+      <div class="card reveal">
+        <h3>Department Summary — CPGRAMS 2024 Pattern</h3>
+        <table class="tbl">
+          <thead><tr><th>Department</th><th>Complaints (L)</th><th>Resolved (L)</th><th>Avg. Days</th><th>Resolution %</th><th>Rank</th></tr></thead>
+          <tbody>
+            <tr><td>Electricity/Lights</td><td>4.1</td><td>3.9</td><td>6</td><td>94%</td><td>🥇 1st</td></tr>
+            <tr><td>Sanitation</td><td>5.0</td><td>4.5</td><td>8</td><td>91%</td><td>🥈 2nd</td></tr>
+            <tr><td>Water Supply</td><td>6.1</td><td>5.4</td><td>12</td><td>88%</td><td>🥉 3rd</td></tr>
+            <tr><td>Infrastructure</td><td>2.0</td><td>1.7</td><td>25</td><td>83%</td><td>4th</td></tr>
+            <tr><td>Roads &amp; Transport</td><td>7.6</td><td>6.2</td><td>18</td><td>82%</td><td>5th</td></tr>
+            <tr><td>Billing &amp; Finance</td><td>2.6</td><td>2.1</td><td>22</td><td>79%</td><td>6th</td></tr>
+            <tr><td>Environment</td><td>1.2</td><td>0.9</td><td>30</td><td>76%</td><td>7th</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── MONTHLY TRENDS ── -->
+    <div class="tab-panel" id="tab-trends">
+      <div class="kpi4">
+        <div class="k reveal"><div class="k-val" style="color:var(--accent);">Nov</div><div class="k-lbl">Current Month</div></div>
+        <div class="k reveal reveal-d1"><div class="k-val" style="color:var(--accent);" data-target="152">0</div><div class="k-lbl">Filed in Nov</div></div>
+        <div class="k reveal reveal-d2"><div class="k-val" style="color:var(--green);" data-target="138">0</div><div class="k-lbl">Resolved in Nov</div></div>
+        <div class="k reveal reveal-d3"><div class="k-val" style="color:var(--gold);">91%</div><div class="k-lbl">Nov Resolution Rate</div></div>
+      </div>
+      <div class="card reveal">
+        <h3>Monthly Grievances Filed vs Resolved — CPGRAMS 2024 <span style="font-size:.72rem;color:var(--text-d);font-family:var(--font-m);">Source: DARPG Annual Report 2024</span></h3>
+        <div style="overflow-x:auto;">
+          <table class="tbl" style="min-width:600px;">
+            <thead><tr><th>Month</th><th>Filed</th><th>Resolved</th><th>Escalated</th><th>Resolution %</th><th>Avg. Time</th></tr></thead>
+            <tbody>
+              <tr><td>January 2024</td><td>2,14,000</td><td>1,94,000</td><td>4,200</td><td>90.7%</td><td>16 days</td></tr>
+              <tr><td>February 2024</td><td>2,28,000</td><td>2,10,000</td><td>3,800</td><td>92.1%</td><td>15 days</td></tr>
+              <tr><td>March 2024</td><td>2,68,000</td><td>2,48,000</td><td>5,100</td><td>92.5%</td><td>14 days</td></tr>
+              <tr><td>April 2024</td><td>2,38,000</td><td>2,18,000</td><td>4,400</td><td>91.6%</td><td>15 days</td></tr>
+              <tr><td>May 2024</td><td>2,52,000</td><td>2,32,000</td><td>4,600</td><td>92.1%</td><td>14 days</td></tr>
+              <tr><td>June 2024</td><td>2,61,000</td><td>2,40,000</td><td>4,900</td><td>91.9%</td><td>15 days</td></tr>
+              <tr><td>July 2024</td><td>2,89,000</td><td>2,64,000</td><td>5,800</td><td>91.3%</td><td>16 days</td></tr>
+              <tr><td>August 2024</td><td>2,75,000</td><td>2,52,000</td><td>5,200</td><td>91.6%</td><td>15 days</td></tr>
+              <tr><td>September 2024</td><td>2,41,000</td><td>2,22,000</td><td>4,300</td><td>92.1%</td><td>14 days</td></tr>
+              <tr><td>October 2024</td><td>2,35,000</td><td>2,14,000</td><td>4,100</td><td>91.1%</td><td>15 days</td></tr>
+              <tr><td>November 2024</td><td>2,18,000</td><td>2,00,000</td><td>4,000</td><td>91.7%</td><td>15 days</td></tr>
+              <tr><td>December 2024</td><td>2,04,000</td><td>1,92,000</td><td>3,600</td><td>94.1%</td><td>13 days</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── CITIZEN FEEDBACK ── -->
+    <div class="tab-panel" id="tab-feedback">
+      <div class="kpi4">
+        <div class="k reveal"><div class="k-val" style="color:var(--gold);">4.6</div><div class="k-lbl">Overall Rating</div></div>
+        <div class="k reveal reveal-d1"><div class="k-val" style="color:var(--green);" data-target="892">0</div><div class="k-lbl">Ratings Submitted</div></div>
+        <div class="k reveal reveal-d2"><div class="k-val" style="color:var(--accent);" data-target="78">0</div><div class="k-lbl">% 5-Star Ratings</div></div>
+        <div class="k reveal reveal-d3"><div class="k-val" style="color:var(--red);" data-target="4">0</div><div class="k-lbl">% 1-Star Ratings</div></div>
+      </div>
+      <div class="two-col">
+        <div class="card reveal">
+          <h3>Rating Distribution</h3>
+          <div class="bar-row"><span class="bar-label">⭐⭐⭐⭐⭐ (5)</span><div class="bar-track"><div class="bar-fill" style="width:78%;background:var(--green);"></div></div><span class="bar-val">78%</span></div>
+          <div class="bar-row"><span class="bar-label">⭐⭐⭐⭐ (4)</span><div class="bar-track"><div class="bar-fill" style="width:13%;background:var(--accent);"></div></div><span class="bar-val">13%</span></div>
+          <div class="bar-row"><span class="bar-label">⭐⭐⭐ (3)</span><div class="bar-track"><div class="bar-fill" style="width:5%;background:var(--yellow);"></div></div><span class="bar-val">5%</span></div>
+          <div class="bar-row"><span class="bar-label">⭐⭐ (2)</span><div class="bar-track"><div class="bar-fill" style="width:3%;background:var(--gold);"></div></div><span class="bar-val">3%</span></div>
+          <div class="bar-row"><span class="bar-label">⭐ (1)</span><div class="bar-track"><div class="bar-fill" style="width:4%;background:var(--red);"></div></div><span class="bar-val">4%</span></div>
+        </div>
+        <div class="card reveal reveal-d1">
+          <h3>Recent Citizen Reviews</h3>
+          <div style="display:flex;flex-direction:column;gap:14px;">
+            <div style="border-bottom:1px solid var(--border);padding-bottom:12px;"><div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span style="font-size:.85rem;font-weight:500;">Sunita I. · Koramangala</span><span style="color:var(--gold);font-size:.85rem;">⭐⭐⭐⭐</span></div><p style="font-size:.82rem;color:var(--text-m);">"Water supply restored in 6 days after pipe repair. Officer kept me updated."</p><p style="font-size:.72rem;color:var(--text-d);">CMP-2402088 · Water Supply</p></div>
+            <div style="border-bottom:1px solid var(--border);padding-bottom:12px;"><div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span style="font-size:.85rem;font-weight:500;">Ravi K. · Whitefield</span><span style="color:var(--gold);font-size:.85rem;">⭐⭐⭐⭐⭐</span></div><p style="font-size:.82rem;color:var(--text-m);">"All 40 streetlights fixed in 5 days. Even got LED upgrade. Outstanding!"</p><p style="font-size:.72rem;color:var(--text-d);">CMP-2402156 · Electricity</p></div>
+            <div style="border-bottom:1px solid var(--border);padding-bottom:12px;"><div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span style="font-size:.85rem;font-weight:500;">Meena R. · HSR Layout</span><span style="color:var(--gold);font-size:.85rem;">⭐⭐⭐⭐⭐</span></div><p style="font-size:.82rem;color:var(--text-m);">"Garbage collection resumed within 2 days. Extra vehicle deployed. Very impressed."</p><p style="font-size:.72rem;color:var(--text-d);">CMP-2401042 · Sanitation</p></div>
+            <div><div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span style="font-size:.85rem;font-weight:500;">Anil D. · Jayanagar</span><span style="color:var(--gold);font-size:.85rem;">⭐⭐⭐</span></div><p style="font-size:.82rem;color:var(--text-m);">"Billing error corrected but took 11 days. Process needs to be faster."</p><p style="font-size:.72rem;color:var(--text-d);">CMP-2403298 · Billing</p></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script><script src="js/auth.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/main.js"></script>
+  <script>
+    requireAuth(); dcmsUpdateNav();
+    dcmsSeedData();
+
+    function switchTab(el, id) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      el.classList.add('active');
+      document.getElementById('tab-' + id).classList.add('active');
+    }
+
+    // ── Pull live stats ──
+    const allC  = dcmsGetComplaints();
+    const stats = dcmsGetStats();
+    const total = stats.total || 1;
+
+    // Patch overview KPIs
+    const kpis = document.querySelectorAll('#tab-overview .k-val');
+    if (kpis[0]) { kpis[0].textContent = stats.total; kpis[0].dataset.target = stats.total; }
+    if (kpis[1]) { const r=Math.round(stats.resolved/total*100); kpis[1].textContent=r+'%'; }
+    if (kpis[3]) { kpis[3].dataset.target = '4.6'; }
+
+    // ── Build trend chart from real data ──
+    const monthlyMap = {};
+    allC.forEach(c => {
+      const m = new Date(c.date).toLocaleString('en',{month:'short'});
+      monthlyMap[m] = (monthlyMap[m]||0) + 1;
+    });
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    // Fill gaps with sample data
+    // Real CPGRAMS 2024 monthly volumes (in thousands)
+    const seedVals = {Jan:214,Feb:228,Mar:268,Apr:238,May:252,Jun:261,Jul:289,Aug:275,Sep:241,Oct:235,Nov:218,Dec:204};
+    const chartMonths = months.filter((m,i) => i < new Date().getMonth()+1);
+    const vals = chartMonths.map(m => monthlyMap[m] || seedVals[m] || 0);
+    const maxV = Math.max(...vals, 1);
+
+    const tc = document.getElementById('overviewTrend');
+    const tl = document.getElementById('overviewTrendLabels');
+    if (tc) {
+      tc.innerHTML = ''; tl.innerHTML = '';
+      vals.forEach((v, i) => {
+        const b = document.createElement('div');
+        b.className = 'trend-bar';
+        b.style.height = '4px';
+        b.title = chartMonths[i] + ': ' + v + ' complaints';
+        tc.appendChild(b);
+        const l = document.createElement('div');
+        l.className = 'trend-lbl'; l.textContent = chartMonths[i];
+        tl.appendChild(l);
+      });
+      setTimeout(() => {
+        tc.querySelectorAll('.trend-bar').forEach((b, i) => {
+          setTimeout(() => {
+            b.style.transition = 'height .5s ease';
+            b.style.height = Math.round(vals[i]/maxV*100) + '%';
+          }, i * 50);
+        });
+      }, 300);
+    }
+
+    // ── Patch complaint analytics tab ──
+    const ctKpis = document.querySelectorAll('#tab-complaints .k-val');
+    const thisMonth = allC.filter(c => new Date(c.date).getMonth() === new Date().getMonth());
+    if (ctKpis[0]) { ctKpis[0].textContent = thisMonth.length; ctKpis[0].dataset.target = thisMonth.length; }
+    if (ctKpis[1]) { const r=thisMonth.filter(c=>c.status==='resolved').length; ctKpis[1].textContent=r; ctKpis[1].dataset.target=r; }
+    if (ctKpis[2]) { ctKpis[2].textContent = stats.escalated||0; ctKpis[2].dataset.target=stats.escalated||0; }
+    if (ctKpis[3]) { const p=stats.open+stats.progress; ctKpis[3].textContent=p; ctKpis[3].dataset.target=p; }
+
+    // ── Inject real complaints into log table ──
+    const logTbl = document.querySelector('#tab-complaints .tbl tbody');
+    if (logTbl && allC.length) {
+      const smap = {'open':'status-open','in-progress':'status-progress','resolved':'status-resolved','escalated':'status-open'};
+      const slbl = {'open':'● Open','in-progress':'◐ In Progress','resolved':'✓ Resolved','escalated':'⬆ Escalated'};
+      const priStyle = {high:'background:rgba(248,113,113,.12);color:var(--red);border:1px solid rgba(248,113,113,.3);',
+        medium:'background:rgba(251,191,36,.1);color:var(--yellow);border:1px solid rgba(251,191,36,.25);',
+        low:'background:rgba(52,211,153,.1);color:var(--green);border:1px solid rgba(52,211,153,.25);'};
+      logTbl.innerHTML = allC.slice(0,8).map(c => `<tr>
+        <td>#${c.id}</td><td>${c.title}</td><td>${c.category}</td>
+        <td>${c.date}</td>
+        <td><span class="status-badge" style="${priStyle[c.priority]||priStyle.medium}">${c.priority}</span></td>
+        <td><span class="status-badge ${smap[c.status]||'status-open'}">${slbl[c.status]||'● Open'}</span></td>
+      </tr>`).join('');
+    }
+  </script>
+  <script>requireAuth(); dcmsUpdateNav();</script>
+</body>
+</html>

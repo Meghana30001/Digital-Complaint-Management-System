@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Profile — DCMS</title>
+  <link rel="stylesheet" href="styles/main.css"/>
+  <link rel="stylesheet" href="styles/animations.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    .dash-layout{display:flex;min-height:calc(100vh - 66px);padding-top:66px;}
+    .sidebar{width:230px;flex-shrink:0;background:var(--bg-card);border-right:1px solid var(--border);padding:28px 0;position:sticky;top:66px;height:calc(100vh - 66px);overflow-y:auto;}
+    .sidebar-section{margin-bottom:22px;}
+    .sidebar-label{font-size:.7rem;text-transform:uppercase;letter-spacing:.12em;color:var(--text-d);padding:0 20px;margin-bottom:8px;}
+    .sidebar-link{display:flex;align-items:center;gap:10px;padding:10px 20px;font-size:.9rem;color:var(--text-m);transition:all .2s;border-left:3px solid transparent;text-decoration:none;}
+    .sidebar-link:hover,.sidebar-link.active{color:var(--text);background:rgba(255,255,255,.04);}
+    .sidebar-link.active{border-left-color:var(--accent);background:rgba(47,128,237,.07);color:var(--accent);}
+    .sidebar-icon{font-size:1rem;width:20px;text-align:center;}
+    .dash-main{flex:1;padding:36px 40px;overflow-x:hidden;}
+    .profile-hero{display:flex;align-items:center;gap:24px;margin-bottom:32px;flex-wrap:wrap;}
+    .profile-avatar{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent-s));display:flex;align-items:center;justify-content:center;font-family:var(--font-h);font-size:2rem;color:#fff;flex-shrink:0;box-shadow:0 0 0 4px rgba(47,128,237,.22);}
+    .profile-info h1{font-family:var(--font-h);font-size:1.7rem;margin-bottom:4px;}
+    .profile-info p{color:var(--text-m);font-size:.88rem;}
+    .profile-grid{display:grid;grid-template-columns:1fr 1.4fr;gap:22px;align-items:start;}
+    .psec{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-l);padding:24px;margin-bottom:18px;}
+    .psec h3{font-family:var(--font-h);font-size:1.05rem;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+    .info-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid rgba(30,43,66,.4);font-size:.88rem;}
+    .info-row:last-child{border-bottom:none;}
+    .info-label{color:var(--text-d);font-size:.8rem;}
+    .info-val{color:var(--text);font-weight:500;}
+    .smg{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
+    .sm{background:var(--bg-card2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;}
+    .sm-val{font-family:var(--font-h);font-size:1.5rem;color:var(--accent);}
+    .sm-lbl{font-size:.73rem;color:var(--text-d);}
+    .cm{padding:10px 0;border-bottom:1px solid rgba(30,43,66,.4);display:flex;justify-content:space-between;align-items:center;font-size:.86rem;}
+    .cm:last-child{border-bottom:none;}
+    .cm-id{font-family:var(--font-m);color:var(--text-d);font-size:.76rem;}
+    .cm-title{color:var(--text);font-weight:500;margin-bottom:2px;}
+    .pass-strength{height:4px;background:var(--border);border-radius:2px;margin-top:6px;overflow:hidden;}
+    .pass-fill{height:100%;border-radius:2px;transition:width .3s,background .3s;width:0;}
+    @media(max-width:1000px){.profile-grid{grid-template-columns:1fr;}}
+    @media(max-width:700px){.sidebar{display:none;}.dash-main{padding:20px 16px;}}
+  </style>
+</head>
+<body>
+  <nav class="navbar" id="navbar">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-brand"><span class="brand-icon">⬡</span><span class="brand-text">DCMS</span></a>
+      <ul class="nav-links" id="navLinks"></ul>
+      <div class="nav-actions">
+        <span style="font-size:.85rem;color:var(--text-m);font-family:var(--font-m);" id="navUserName"></span>
+        <a href="#" class="btn-ghost" onclick="dcmsLogout()">Logout</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="dash-layout">
+    <aside class="sidebar" id="sidebar"></aside>
+
+    <main class="dash-main">
+      <div class="profile-hero reveal">
+        <div class="profile-avatar dcms-user-avatar">?</div>
+        <div class="profile-info">
+          <h1 class="dcms-user-name">Loading…</h1>
+          <p id="profileMeta"></p>
+          <div style="display:flex;gap:8px;margin-top:10px;" id="profileBadges"></div>
+        </div>
+      </div>
+
+      <div class="profile-grid">
+        <!-- LEFT -->
+        <div>
+          <div class="psec reveal">
+            <h3>Account Information</h3>
+            <div class="info-row"><span class="info-label">Full Name</span><span class="info-val dcms-user-name">—</span></div>
+            <div class="info-row"><span class="info-label">Email</span><span class="info-val dcms-user-email">—</span></div>
+            <div class="info-row"><span class="info-label">Phone</span><span class="info-val" id="profilePhone">—</span></div>
+            <div class="info-row"><span class="info-label">Role</span><span class="info-val" id="profileRole">—</span></div>
+            <div class="info-row"><span class="info-label">Department</span><span class="info-val dcms-user-dept">—</span></div>
+            <div class="info-row"><span class="info-label">User ID</span><span class="info-val dcms-user-id" style="font-family:var(--font-m);font-size:.8rem;color:var(--text-d);">—</span></div>
+            <div class="info-row"><span class="info-label">Member Since</span><span class="info-val dcms-user-since">—</span></div>
+            <button class="btn-outline" style="margin-top:18px;width:100%;" onclick="showEdit()">✏️ Edit Profile</button>
+          </div>
+
+          <div class="psec reveal" id="editForm" style="display:none;">
+            <h3>Edit Profile</h3>
+            <div class="form-group"><label class="form-label">Full Name</label><input type="text" class="form-input" id="editName"/></div>
+            <div class="form-group"><label class="form-label">Phone</label><input type="tel" class="form-input" id="editPhone"/></div>
+            <div style="display:flex;gap:10px;">
+              <button class="btn-primary" style="flex:1;" onclick="saveProfile()">Save Changes</button>
+              <button class="btn-ghost" onclick="hideEdit()">Cancel</button>
+            </div>
+          </div>
+
+          <div class="psec reveal">
+            <h3>Change Password</h3>
+            <div class="form-group"><label class="form-label">Current Password</label><input type="password" class="form-input" placeholder="••••••••"/></div>
+            <div class="form-group"><label class="form-label">New Password</label>
+              <input type="password" class="form-input" id="newPass" placeholder="New password" oninput="chkStrength(this.value)"/>
+              <div class="pass-strength"><div class="pass-fill" id="passFill"></div></div>
+              <p style="font-size:.75rem;color:var(--text-d);margin-top:4px;" id="passLabel">Enter a new password</p>
+            </div>
+            <div class="form-group" style="margin-bottom:0;"><label class="form-label">Confirm New Password</label><input type="password" class="form-input" placeholder="Confirm password"/></div>
+            <button class="btn-primary" style="margin-top:16px;" onclick="showToast('Password updated!','success')">Update Password</button>
+          </div>
+        </div>
+
+        <!-- RIGHT -->
+        <div>
+          <div class="psec reveal">
+            <h3 id="statsTitle">Activity Overview</h3>
+            <div class="smg" id="statsGrid"></div>
+          </div>
+          <div class="psec reveal">
+            <h3 id="activityTitle">Recent Activity</h3>
+            <div id="activityList"></div>
+            <a href="track.html" class="btn-ghost" style="display:block;text-align:center;margin-top:14px;font-size:.86rem;">View All →</a>
+          </div>
+          <div class="psec reveal">
+            <h3>Notification Preferences</h3>
+            <div style="display:flex;flex-direction:column;gap:12px;" id="notifList"></div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="js/api.js"></script><script src="js/auth.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/main.js"></script>
+  <script>
+  const u = dcmsGetUser();
+
+  // ── Apply basic fields ──
+  dcmsApplyUser();
+  document.getElementById('navUserName').textContent = u.roleIcon + ' ' + u.name;
+  document.getElementById('profilePhone').textContent = u.phone;
+  document.getElementById('profileRole').textContent = u.roleLabel;
+
+  // ── Profile meta line ──
+  document.getElementById('profileMeta').textContent =
+    u.email + '  ·  ' + u.roleIcon + ' ' + u.roleLabel + '  ·  Member since ' + u.since;
+
+  // ── Badges ──
+  const badges = document.getElementById('profileBadges');
+  badges.innerHTML = `<span class="badge">${u.roleIcon} ${u.roleLabel}</span>
+    <span class="badge" style="background:rgba(52,211,153,.1);border-color:rgba(52,211,153,.3);color:var(--green);">● Active</span>`;
+
+  // ── Edit form pre-fill ──
+  document.getElementById('editName').value = u.name;
+  document.getElementById('editPhone').value = u.phone;
+
+  // ── Nav links per role ──
+  const navCfg = {
+    citizen: `<li><a href="index.html">Home</a></li><li><a href="citizen-dashboard.html">Dashboard</a></li><li><a href="file-complaint.html">File Complaint</a></li><li><a href="track.html">Track</a></li>`,
+    officer: `<li><a href="index.html">Home</a></li><li><a href="officer-dashboard.html">Dashboard</a></li><li><a href="track.html">Track</a></li><li><a href="reports.html">Reports</a></li>`,
+    admin:   `<li><a href="index.html">Home</a></li><li><a href="dashboard.html">Dashboard</a></li><li><a href="file-complaint.html">File Complaint</a></li><li><a href="track.html">Track</a></li><li><a href="reports.html">Reports</a></li>`
+  };
+  document.getElementById('navLinks').innerHTML = navCfg[u.role] || navCfg.citizen;
+
+  // ── Sidebar per role ──
+  const sidebarCfg = {
+    citizen: `
+      <div class="sidebar-section"><div class="sidebar-label">My Portal</div>
+        <a href="citizen-dashboard.html" class="sidebar-link"><span class="sidebar-icon">🏠</span> My Dashboard</a>
+        <a href="file-complaint.html" class="sidebar-link"><span class="sidebar-icon">✍️</span> File Complaint</a>
+        <a href="track.html" class="sidebar-link"><span class="sidebar-icon">🔍</span> Track Status</a>
+      </div>`,
+    officer: `
+      <div class="sidebar-section"><div class="sidebar-label">Officer Panel</div>
+        <a href="officer-dashboard.html" class="sidebar-link"><span class="sidebar-icon">🏠</span> My Assignments</a>
+        <a href="track.html" class="sidebar-link"><span class="sidebar-icon">🔍</span> Search Complaint</a>
+        <a href="reports.html" class="sidebar-link"><span class="sidebar-icon">📋</span> Reports</a>
+      </div>`,
+    admin: `
+      <div class="sidebar-section"><div class="sidebar-label">Main</div>
+        <a href="dashboard.html" class="sidebar-link"><span class="sidebar-icon">📊</span> Dashboard</a>
+        <a href="file-complaint.html" class="sidebar-link"><span class="sidebar-icon">✍️</span> File Complaint</a>
+        <a href="track.html" class="sidebar-link"><span class="sidebar-icon">🔍</span> Track</a>
+        <a href="reports.html" class="sidebar-link"><span class="sidebar-icon">📋</span> Reports</a>
+      </div>
+      <div class="sidebar-section"><div class="sidebar-label">Management</div>
+        <a href="users.html" class="sidebar-link"><span class="sidebar-icon">👥</span> Users</a>
+        <a href="departments.html" class="sidebar-link"><span class="sidebar-icon">🏢</span> Departments</a>
+        <a href="categories.html" class="sidebar-link"><span class="sidebar-icon">🏷️</span> Categories</a>
+        <a href="settings.html" class="sidebar-link"><span class="sidebar-icon">⚙️</span> Settings</a>
+      </div>`
+  };
+  const accountSection = `<div class="sidebar-section"><div class="sidebar-label">Account</div>
+    <a href="profile.html" class="sidebar-link active"><span class="sidebar-icon">👤</span> My Profile</a>
+    <a href="#" class="sidebar-link" onclick="dcmsLogout()"><span class="sidebar-icon">🚪</span> Logout</a>
+  </div>`;
+  document.getElementById('sidebar').innerHTML = (sidebarCfg[u.role] || sidebarCfg.citizen) + accountSection;
+
+  // ── Stats per role ──
+  const statsCfg = {
+    citizen: {
+      title: 'My Complaint Stats',
+      stats: [
+        {val:'7', lbl:'Total Filed', c:'var(--accent)'},
+        {val:'5', lbl:'Resolved', c:'var(--green)'},
+        {val:'1', lbl:'In Progress', c:'var(--yellow)'},
+        {val:'1', lbl:'Open', c:'var(--red)'}
+      ]
+    },
+    officer: {
+      title: 'Officer Performance',
+      stats: [
+        {val:'4', lbl:'Currently Assigned', c:'var(--accent)'},
+        {val:'28', lbl:'Resolved This Month', c:'var(--green)'},
+        {val:'1', lbl:'SLA Breached', c:'var(--red)'},
+        {val:'4.7', lbl:'Avg. Citizen Rating', c:'var(--gold)'}
+      ]
+    },
+    admin: {
+      title: 'System Overview',
+      stats: [
+        {val:'1240', lbl:'Total Complaints', c:'var(--accent)'},
+        {val:'1153', lbl:'Resolved', c:'var(--green)'},
+        {val:'87', lbl:'Pending', c:'var(--yellow)'},
+        {val:'48h', lbl:'Avg. Resolution', c:'var(--gold)'}
+      ]
+    }
+  };
+  const sc = statsCfg[u.role] || statsCfg.citizen;
+  document.getElementById('statsTitle').textContent = sc.title;
+  document.getElementById('statsGrid').innerHTML = sc.stats.map(s =>
+    `<div class="sm"><div class="sm-val" style="color:${s.c};">${s.val}</div><div class="sm-lbl">${s.lbl}</div></div>`
+  ).join('');
+
+  // ── Recent Activity per role ──
+  const actCfg = {
+    citizen: {title:'My Recent Complaints', items:[
+      {title:'Streetlight Failure — Zone 4', id:'#CMP-4912 · Infrastructure · Nov 8', badge:'status-open', btext:'● Open'},
+      {title:'Billing Discrepancy', id:'#CMP-4899 · Billing · Nov 6', badge:'status-progress', btext:'◐ In Progress'},
+      {title:'Road Damage — Main St.', id:'#CMP-4821 · Roads · Nov 2', badge:'status-resolved', btext:'✓ Resolved'},
+      {title:'Garbage Collection Missed', id:'#CMP-4800 · Sanitation · Oct 29', badge:'status-resolved', btext:'✓ Resolved'}
+    ]},
+    officer: {title:'Recently Handled', items:[
+      {title:'Road Pothole — Ring Road', id:'#CMP-4905 · In Progress', badge:'status-progress', btext:'◐ In Progress'},
+      {title:'Traffic Signal Malfunction', id:'#CMP-4893 · In Progress', badge:'status-progress', btext:'◐ In Progress'},
+      {title:'Road Damage — Main St.', id:'#CMP-4821 · Resolved · Nov 2', badge:'status-resolved', btext:'✓ Resolved'},
+      {title:'Bridge Railing Broken', id:'#CMP-4804 · Resolved · Oct 30', badge:'status-resolved', btext:'✓ Resolved'}
+    ]},
+    admin: {title:'Recent System Activity', items:[
+      {title:'Road Damage — Main St.', id:'#CMP-4821 · Roads · Nov 2', badge:'status-resolved', btext:'✓ Resolved'},
+      {title:'Billing Discrepancy', id:'#CMP-4899 · Billing · Nov 6', badge:'status-progress', btext:'◐ In Progress'},
+      {title:'Service Unavailable — Zone 4', id:'#CMP-4912 · Infrastructure · Nov 8', badge:'status-open', btext:'● Open'},
+      {title:'Garbage Collection Missed', id:'#CMP-4800 · Sanitation · Oct 29', badge:'status-resolved', btext:'✓ Resolved'}
+    ]}
+  };
+  const ac = actCfg[u.role] || actCfg.citizen;
+  document.getElementById('activityTitle').textContent = ac.title;
+  document.getElementById('activityList').innerHTML = ac.items.map(i =>
+    `<div class="cm"><div><div class="cm-title">${i.title}</div><div class="cm-id">${i.id}</div></div>
+     <span class="status-badge ${i.badge}">${i.btext}</span></div>`
+  ).join('');
+
+  // ── Notification prefs per role ──
+  const notifCfg = {
+    citizen: [
+      {lbl:'Email on complaint status update', on:true},
+      {lbl:'SMS when complaint is resolved', on:true},
+      {lbl:'Weekly digest', on:false}
+    ],
+    officer: [
+      {lbl:'New complaint assigned to me', on:true},
+      {lbl:'SLA breach warning', on:true},
+      {lbl:'Citizen feedback received', on:true},
+      {lbl:'Weekly performance report', on:false}
+    ],
+    admin: [
+      {lbl:'Email on new complaint (any dept)', on:true},
+      {lbl:'SLA breach alerts', on:true},
+      {lbl:'Weekly system summary', on:false},
+      {lbl:'Officer performance alerts', on:true}
+    ]
+  };
+  const nc = (notifCfg[u.role] || notifCfg.citizen);
+  document.getElementById('notifList').innerHTML = nc.map((n, i) => `
+    <div style="display:flex;justify-content:space-between;align-items:center;font-size:.9rem;padding:6px 0;">
+      <span style="color:var(--text-m);">${n.lbl}</span>
+      <div id="tog-${i}" class="${n.on?'tog-on':''}"
+        onclick="dcmsToggle(this,'${n.lbl.replace(/'/g,'')}')"
+        style="position:relative;width:48px;height:26px;border-radius:26px;cursor:pointer;flex-shrink:0;
+               background:${n.on?'var(--accent)':'rgba(255,255,255,.12)'};transition:background .3s;">
+        <span style="position:absolute;width:20px;height:20px;border-radius:50%;background:#fff;
+               top:3px;left:${n.on?'25px':'3px'};transition:left .3s;box-shadow:0 1px 4px rgba(0,0,0,.3);"></span>
+      </div>
+    </div>`).join('');
+
+  window.dcmsToggle = function(el, lbl) {
+    const isOn = !el.classList.contains('tog-on');
+    el.classList.toggle('tog-on', isOn);
+    el.style.background = isOn ? 'var(--accent)' : 'rgba(255,255,255,.12)';
+    const knob = el.querySelector('span');
+    knob.style.left = isOn ? '25px' : '3px';
+    showToast((isOn ? '🔔 Enabled: ' : '🔕 Disabled: ') + lbl, isOn ? 'success' : 'info');
+  };
+
+  // ── Helpers ──
+  function showEdit() {
+    document.getElementById('editName').value = u.name;
+    document.getElementById('editPhone').value = u.phone;
+    document.getElementById('editForm').style.display='block';
+  }
+  function hideEdit() { document.getElementById('editForm').style.display='none'; }
+  function saveProfile() {
+    u.name = document.getElementById('editName').value;
+    u.phone = document.getElementById('editPhone').value;
+    localStorage.setItem('dcmsUser', JSON.stringify(u));
+    hideEdit();
+    dcmsApplyUser();
+    showToast('Profile updated!','success');
+  }
+  function chkStrength(val) {
+    const fill=document.getElementById('passFill'), lbl=document.getElementById('passLabel');
+    let s=0; if(val.length>=8)s++; if(/[A-Z]/.test(val))s++; if(/[0-9]/.test(val))s++; if(/[^A-Za-z0-9]/.test(val))s++;
+    const c=[{w:'0%',c:'var(--red)',l:'Too short'},{w:'25%',c:'var(--red)',l:'Weak'},{w:'50%',c:'var(--yellow)',l:'Fair'},{w:'75%',c:'var(--gold)',l:'Good'},{w:'100%',c:'var(--green)',l:'Strong ✓'}][s];
+    fill.style.width=c.w; fill.style.background=c.c; lbl.textContent=c.l; lbl.style.color=c.c;
+  }
+  </script>
+  <script>requireAuth(); dcmsUpdateNav();</script>
+</body>
+</html>

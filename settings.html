@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Settings — DCMS</title>
+  <link rel="stylesheet" href="styles/main.css"/>
+  <link rel="stylesheet" href="styles/animations.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    .dash-layout{display:flex;min-height:calc(100vh - 66px);padding-top:66px;}
+    .sidebar{width:240px;flex-shrink:0;background:var(--bg-card);border-right:1px solid var(--border);padding:32px 0;position:sticky;top:66px;height:calc(100vh - 66px);overflow-y:auto;}
+    .sidebar-section{margin-bottom:28px;}
+    .sidebar-label{font-size:.7rem;text-transform:uppercase;letter-spacing:.12em;color:var(--text-d);padding:0 20px;margin-bottom:8px;}
+    .sidebar-link{display:flex;align-items:center;gap:10px;padding:10px 20px;font-size:.9rem;color:var(--text-m);transition:color .2s,background .2s;border-left:3px solid transparent;}
+    .sidebar-link:hover,.sidebar-link.active{color:var(--text);background:rgba(255,255,255,.04);}
+    .sidebar-link.active{border-left-color:var(--accent);background:rgba(47,128,237,.07);color:var(--accent);}
+    .sidebar-icon{font-size:1rem;width:20px;text-align:center;}
+    .dash-main{flex:1;padding:40px;overflow-x:hidden;}
+    .page-topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:32px;flex-wrap:wrap;gap:16px;}
+    .page-topbar h1{font-family:var(--font-h);font-size:1.8rem;}
+    .page-topbar p{color:var(--text-m);font-size:.9rem;margin-top:2px;}
+    .settings-layout{display:grid;grid-template-columns:200px 1fr;gap:24px;}
+    .settings-nav{display:flex;flex-direction:column;gap:4px;}
+    .settings-nav-btn{text-align:left;background:none;border:none;padding:9px 14px;border-radius:8px;font-size:.9rem;color:var(--text-m);cursor:pointer;transition:all .2s;font-family:var(--font-b);}
+    .settings-nav-btn.active,.settings-nav-btn:hover{background:rgba(47,128,237,.08);color:var(--accent);}
+    .settings-panel{display:none;}
+    .settings-panel.active{display:block;animation:fadeIn .3s ease;}
+    .settings-section{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-l);padding:28px;margin-bottom:20px;}
+    .settings-section h3{font-family:var(--font-h);font-size:1.15rem;margin-bottom:4px;}
+    .settings-section .sec-desc{font-size:.85rem;color:var(--text-m);margin-bottom:24px;}
+    .setting-row{display:flex;justify-content:space-between;align-items:center;padding:16px 0;border-bottom:1px solid rgba(30,43,66,.5);}
+    .setting-row:last-child{border-bottom:none;padding-bottom:0;}
+    .setting-info h4{font-size:.9rem;font-weight:500;margin-bottom:2px;}
+    .setting-info p{font-size:.8rem;color:var(--text-d);}
+    /* Toggle switch */
+    .toggle{position:relative;width:44px;height:24px;flex-shrink:0;}
+    .toggle input{opacity:0;width:0;height:0;}
+    .toggle-slider{position:absolute;inset:0;background:var(--border-l);border-radius:24px;cursor:pointer;transition:.3s;}
+    .toggle-slider::before{content:'';position:absolute;height:18px;width:18px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.3s;}
+    .toggle input:checked + .toggle-slider{background:var(--accent);}
+    .toggle input:checked + .toggle-slider::before{transform:translateX(20px);}
+    .danger-zone{background:rgba(248,113,113,.06);border-color:rgba(248,113,113,.25);}
+    .danger-zone h3{color:var(--red);}
+    @media(max-width:900px){.settings-layout{grid-template-columns:1fr;}}
+    @media(max-width:700px){.sidebar{display:none;}.dash-main{padding:20px 16px;}}
+  </style>
+</head>
+<body>
+  <nav class="navbar" id="navbar">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-brand"><span class="brand-icon">⬡</span><span class="brand-text">DCMS</span></a>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="dashboard.html">Dashboard</a></li>
+        <li><a href="file-complaint.html">File Complaint</a></li>
+        <li><a href="track.html">Track</a></li>
+        <li><a href="reports.html">Reports</a></li>
+      </ul>
+      <div class="nav-actions">
+        <a href="login.html" class="btn-ghost">Sign In</a>
+        <a href="register.html" class="btn-primary">Register</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="dash-layout">
+    <aside class="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-label">Main</div>
+        <a href="dashboard.html" class="sidebar-link"><span class="sidebar-icon">📊</span> Dashboard</a>
+        <a href="file-complaint.html" class="sidebar-link"><span class="sidebar-icon">✍️</span> File Complaint</a>
+        <a href="track.html" class="sidebar-link"><span class="sidebar-icon">🔍</span> Track Status</a>
+        <a href="reports.html" class="sidebar-link"><span class="sidebar-icon">📋</span> Reports</a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-label">Management</div>
+        <a href="users.html" class="sidebar-link"><span class="sidebar-icon">👥</span> Users</a>
+        <a href="departments.html" class="sidebar-link"><span class="sidebar-icon">🏢</span> Departments</a>
+        <a href="categories.html" class="sidebar-link"><span class="sidebar-icon">🏷️</span> Categories</a>
+        <a href="settings.html" class="sidebar-link active"><span class="sidebar-icon">⚙️</span> Settings</a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-label">Account</div>
+        <a href="profile.html" class="sidebar-link"><span class="sidebar-icon">👤</span> My Profile</a>
+        <a href="login.html" class="sidebar-link"><span class="sidebar-icon">🚪</span> Logout</a>
+      </div>
+    </aside>
+
+    <main class="dash-main">
+      <div class="page-topbar">
+        <div><h1>System Settings</h1><p>Configure system behaviour, notifications, and database options.</p></div>
+      </div>
+
+      <div class="settings-layout">
+        <!-- Left nav -->
+        <div class="settings-nav reveal">
+          <button class="settings-nav-btn active" onclick="switchPanel('general',this)">⚙️ General</button>
+          <button class="settings-nav-btn" onclick="switchPanel('notifications',this)">🔔 Notifications</button>
+          <button class="settings-nav-btn" onclick="switchPanel('sla',this)">⏱️ SLA Rules</button>
+          <button class="settings-nav-btn" onclick="switchPanel('security',this)">🔐 Security</button>
+          <button class="settings-nav-btn" onclick="switchPanel('database',this)">🗄️ Database</button>
+        </div>
+
+        <div>
+          <!-- GENERAL -->
+          <div class="settings-panel active" id="panel-general">
+            <div class="settings-section reveal">
+              <h3>Platform Settings</h3>
+              <div class="sec-desc">Core configuration for the DCMS platform.</div>
+              <div class="form-group"><label class="form-label">Platform Name</label><input type="text" class="form-input" value="Digital Complaint Management System"/></div>
+              <div class="form-group"><label class="form-label">Platform Short Code</label><input type="text" class="form-input" value="DCMS" style="max-width:160px;font-family:var(--font-m);"/></div>
+              <div class="form-group"><label class="form-label">Admin Email</label><input type="email" class="form-input" value="admin@dcms.gov.in"/></div>
+              <div class="form-group"><label class="form-label">Timezone</label>
+                <select class="form-select" style="max-width:280px;">
+                  <option selected>Asia/Kolkata (IST, UTC+5:30)</option>
+                  <option>UTC</option><option>America/New_York</option>
+                </select>
+              </div>
+              <div class="form-group" style="margin-bottom:0;"><label class="form-label">Date Format</label>
+                <select class="form-select" style="max-width:200px;">
+                  <option>YYYY-MM-DD</option><option>DD/MM/YYYY</option><option>MM/DD/YYYY</option>
+                </select>
+              </div>
+            </div>
+            <div class="settings-section reveal">
+              <h3>Feature Toggles</h3>
+              <div class="sec-desc">Enable or disable platform features.</div>
+              <div class="setting-row">
+                <div class="setting-info"><h4>Public Complaint Tracking</h4><p>Allow anyone to track a complaint by ID without login</p></div>
+                <label class="toggle"><input type="checkbox" checked onchange="showToast('Setting updated','success')"/><span class="toggle-slider"></span></label>
+              </div>
+              <div class="setting-row">
+                <div class="setting-info"><h4>Citizen Registration</h4><p>Allow new citizens to self-register</p></div>
+                <label class="toggle"><input type="checkbox" checked onchange="showToast('Setting updated','success')"/><span class="toggle-slider"></span></label>
+              </div>
+              <div class="setting-row">
+                <div class="setting-info"><h4>File Attachments</h4><p>Allow evidence files to be uploaded with complaints</p></div>
+                <label class="toggle"><input type="checkbox" checked onchange="showToast('Setting updated','success')"/><span class="toggle-slider"></span></label>
+              </div>
+              <div class="setting-row">
+                <div class="setting-info"><h4>Citizen Feedback / Ratings</h4><p>Allow citizens to rate resolved complaints</p></div>
+                <label class="toggle"><input type="checkbox" checked onchange="showToast('Setting updated','success')"/><span class="toggle-slider"></span></label>
+              </div>
+              <div class="setting-row">
+                <div class="setting-info"><h4>Maintenance Mode</h4><p>Take the platform offline for maintenance</p></div>
+                <label class="toggle"><input type="checkbox" onchange="showToast('Maintenance mode toggled','info')"/><span class="toggle-slider"></span></label>
+              </div>
+            </div>
+            <button class="btn-primary" onclick="showToast('Settings saved!','success')">Save Changes</button>
+          </div>
+
+          <!-- NOTIFICATIONS -->
+          <div class="settings-panel" id="panel-notifications">
+            <div class="settings-section reveal">
+              <h3>Email Notifications</h3>
+              <div class="sec-desc">Control which events trigger email alerts to users.</div>
+              <div class="setting-row">
+                <div class="setting-info"><h4>New Complaint Filed</h4><p>Notify citizen on successful submission</p></div>
+                <label class="toggle"><input type="checkbox" checked onchange="showToast('Setting updated','success')"/><span class="toggle-slider"></span></label>
+              </div>
+              <div class="setting-row">
+                <div class="setting-info"><h4>Status Update</h4><p>Notify citizen when officer updates complaint status</p></div>
+                <label class="toggle"><input type="checkbox" checked onchange="showToast('Setting updated','success')"/><span class="toggle-slider"></span></label>
+              </div>
+              <div class="setting-row">
+                <div class="setting-info"><h4>Assignment Notification</h4><p>Notify officer when a complaint is assigned to them</p></div>
+                <label class="toggle"><input type="checkbox" checked onchange="showToast('Setting updated','success')"/><span class="toggle-slider"></span></label>
+              </div>
+              <div class="setting-row">
+                <div class="setting-info"><h4>SLA Breach Alert</h4><p>Notify admin &amp; officer when SLA threshold is exceeded</p></div>
+                <label class="toggle"><input type="checkbox" checked onchange="showToast('Setting updated','success')"/><span class="toggle-slider"></span></label>
+              </div>
+              <div class="setting-row">
+                <div class="setting-info"><h4>Resolution Confirmation</h4><p>Notify citizen when complaint is marked resolved</p></div>
+                <label class="toggle"><input type="checkbox" checked onchange="showToast('Setting updated','success')"/><span class="toggle-slider"></span></label>
+              </div>
+            </div>
+            <button class="btn-primary" onclick="showToast('Notification settings saved!','success')">Save Changes</button>
+          </div>
+
+          <!-- SLA -->
+          <div class="settings-panel" id="panel-sla">
+            <div class="settings-section reveal">
+              <h3>SLA Configuration</h3>
+              <div class="sec-desc">Set resolution time targets per priority level. Breaches trigger auto-escalation via database triggers.</div>
+              <div class="form-group"><label class="form-label">High Priority — SLA (hours)</label><input type="number" class="form-input" value="24" style="max-width:140px;"/></div>
+              <div class="form-group"><label class="form-label">Medium Priority — SLA (hours)</label><input type="number" class="form-input" value="72" style="max-width:140px;"/></div>
+              <div class="form-group" style="margin-bottom:0;"><label class="form-label">Low Priority — SLA (hours)</label><input type="number" class="form-input" value="168" style="max-width:140px;"/></div>
+            </div>
+            <div class="settings-section reveal">
+              <h3>Escalation Rules</h3>
+              <div class="sec-desc">Actions triggered automatically when SLA is breached.</div>
+              <div class="setting-row">
+                <div class="setting-info"><h4>Auto-escalate to Department Head</h4><p>On SLA breach, escalate to head officer automatically</p></div>
+                <label class="toggle"><input type="checkbox" checked onchange="showToast('Setting updated','success')"/><span class="toggle-slider"></span></label>
+              </div>
+              <div class="setting-row">
+                <div class="setting-info"><h4>Escalation Reminder Interval</h4><p>Send follow-up alert every N hours after breach</p></div>
+                <input type="number" class="form-input" value="12" style="max-width:100px;"/>
+              </div>
+            </div>
+            <button class="btn-primary" onclick="showToast('SLA settings saved!','success')">Save Changes</button>
+          </div>
+
+          <!-- SECURITY -->
+          <div class="settings-panel" id="panel-security">
+            <div class="settings-section reveal">
+              <h3>Authentication</h3>
+              <div class="sec-desc">Configure login and session security policies.</div>
+              <div class="form-group"><label class="form-label">Session Timeout (minutes)</label><input type="number" class="form-input" value="60" style="max-width:140px;"/></div>
+              <div class="setting-row">
+                <div class="setting-info"><h4>Require Strong Passwords</h4><p>Enforce min 8 chars, 1 uppercase, 1 number</p></div>
+                <label class="toggle"><input type="checkbox" checked onchange="showToast('Setting updated','success')"/><span class="toggle-slider"></span></label>
+              </div>
+              <div class="setting-row">
+                <div class="setting-info"><h4>Lock after Failed Attempts</h4><p>Lock account after 5 consecutive login failures</p></div>
+                <label class="toggle"><input type="checkbox" checked onchange="showToast('Setting updated','success')"/><span class="toggle-slider"></span></label>
+              </div>
+            </div>
+            <button class="btn-primary" onclick="showToast('Security settings saved!','success')">Save Changes</button>
+          </div>
+
+          <!-- DATABASE -->
+          <div class="settings-panel" id="panel-database">
+            <div class="settings-section reveal">
+              <h3>Database Info</h3>
+              <div class="sec-desc">Read-only connection details for the DCMS MySQL database.</div>
+              <div style="display:flex;flex-direction:column;gap:12px;">
+                <div style="display:flex;justify-content:space-between;font-size:.9rem;padding:10px 0;border-bottom:1px solid var(--border);">
+                  <span style="color:var(--text-d);">Engine</span><span style="font-family:var(--font-m);color:var(--accent-s);">MySQL 8.0</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;font-size:.9rem;padding:10px 0;border-bottom:1px solid var(--border);">
+                  <span style="color:var(--text-d);">Database</span><span style="font-family:var(--font-m);">dcms_db</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;font-size:.9rem;padding:10px 0;border-bottom:1px solid var(--border);">
+                  <span style="color:var(--text-d);">Tables</span><span style="font-family:var(--font-m);">8 primary + 2 views</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;font-size:.9rem;padding:10px 0;border-bottom:1px solid var(--border);">
+                  <span style="color:var(--text-d);">Total Records</span><span style="font-family:var(--font-m);" data-target="14820">0</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;font-size:.9rem;padding:10px 0;">
+                  <span style="color:var(--text-d);">Last Backup</span><span style="font-family:var(--font-m);color:var(--green);">2024-11-08 · 03:00 AM</span>
+                </div>
+              </div>
+            </div>
+            <div class="settings-section reveal danger-zone">
+              <h3>Danger Zone</h3>
+              <div class="sec-desc" style="color:var(--text-m);">Destructive actions — use with extreme caution. These cannot be undone.</div>
+              <div style="display:flex;gap:12px;flex-wrap:wrap;">
+                <button class="btn-outline" style="border-color:rgba(248,113,113,.4);color:var(--red);" onclick="showToast('Export initiated...','info')">📦 Export Database</button>
+                <button class="btn-outline" style="border-color:rgba(248,113,113,.4);color:var(--red);" onclick="if(confirm('This will clear ALL complaint data. Are you sure?')) showToast('Action cancelled (demo).','error')">🗑️ Purge Resolved Complaints</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="js/api.js"></script><script src="js/auth.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/main.js"></script>
+  <script>
+    function switchPanel(id, btn) {
+      document.querySelectorAll('.settings-nav-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.settings-panel').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('panel-' + id).classList.add('active');
+    }
+  </script>
+  <script>requireAuth(); dcmsUpdateNav();</script>
+</body>
+</html>

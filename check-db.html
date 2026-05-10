@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Database Check - DCMS</title>
+  <style>
+    body{font-family:system-ui,sans-serif;padding:20px;background:#f5f5f5;}
+    .container{max-width:800px;margin:0 auto;background:white;padding:30px;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,0.1);}
+    h1{color:#2f80ed;margin-bottom:20px;}
+    .section{margin-bottom:30px;}
+    .section h2{color:#333;border-bottom:2px solid #2f80ed;padding-bottom:5px;}
+    .data{background:#f8f9fa;padding:15px;border-radius:4px;font-family:monospace;white-space:pre-wrap;max-height:300px;overflow-y:auto;}
+    .btn{background:#2f80ed;color:white;padding:10px 20px;border:none;border-radius:4px;cursor:pointer;margin:5px;}
+    .btn:hover{background:#1a5fb4;}
+    .success{color:#28a745;}
+    .error{color:#dc3545;}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🔍 DCMS Database Checker</h1>
+    
+    <div class="section">
+      <h2>Test Registration</h2>
+      <button class="btn" onclick="testRegistration()">Register Test User</button>
+      <div id="regResult" class="data"></div>
+    </div>
+    
+    <div class="section">
+      <h2>Test Complaint</h2>
+      <button class="btn" onclick="testComplaint()">Create Test Complaint</button>
+      <div id="compResult" class="data"></div>
+    </div>
+    
+    <div class="section">
+      <h2>Check Database</h2>
+      <button class="btn" onclick="checkUsers()">View All Users</button>
+      <button class="btn" onclick="checkComplaints()">View All Complaints</button>
+      <div id="dbResult" class="data"></div>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script>
+    async function testRegistration() {
+      const result = document.getElementById('regResult');
+      try {
+        const payload = {
+          name: 'Test User ' + Date.now(),
+          email: 'test' + Date.now() + '@dcms.com',
+          password: 'test1234',
+          role: 'citizen'
+        };
+        
+        result.innerHTML = 'Registering test user...';
+        const response = await dcmsApi.register(payload);
+        result.innerHTML = '<span class="success">✅ Registration successful!</span>\n' + JSON.stringify(response, null, 2);
+      } catch (err) {
+        result.innerHTML = '<span class="error">❌ Registration failed:</span>\n' + err.message;
+      }
+    }
+    
+    async function testComplaint() {
+      const result = document.getElementById('compResult');
+      try {
+        const payload = {
+          title: 'Test Complaint ' + Date.now(),
+          category: 'Infrastructure',
+          dept: 'Public Works',
+          description: 'This is a test complaint to verify database saving.',
+          priority: 'medium',
+          location: 'Test Location'
+        };
+        
+        result.innerHTML = 'Creating test complaint...';
+        const response = await dcmsApi.createComplaint(payload);
+        result.innerHTML = '<span class="success">✅ Complaint created!</span>\n' + JSON.stringify(response, null, 2);
+      } catch (err) {
+        result.innerHTML = '<span class="error">❌ Complaint creation failed:</span>\n' + err.message;
+      }
+    }
+    
+    async function checkUsers() {
+      const result = document.getElementById('dbResult');
+      try {
+        result.innerHTML = 'Fetching users from database...';
+        const response = await fetch('http://localhost:5005/api/auth/users');
+        const users = await response.json();
+        result.innerHTML = '<span class="success">✅ Users in database:</span>\n' + JSON.stringify(users, null, 2);
+      } catch (err) {
+        result.innerHTML = '<span class="error">❌ Failed to fetch users:</span>\n' + err.message;
+      }
+    }
+    
+    async function checkComplaints() {
+      const result = document.getElementById('dbResult');
+      try {
+        result.innerHTML = 'Fetching complaints from database...';
+        const response = await fetch('http://localhost:5005/api/complaints');
+        const complaints = await response.json();
+        result.innerHTML = '<span class="success">✅ Complaints in database:</span>\n' + JSON.stringify(complaints, null, 2);
+      } catch (err) {
+        result.innerHTML = '<span class="error">❌ Failed to fetch complaints:</span>\n' + err.message;
+      }
+    }
+  </script>
+</body>
+</html>

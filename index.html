@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>DCMS — Digital Complaint Management System</title>
+  <link rel="stylesheet" href="styles/main.css" />
+  <link rel="stylesheet" href="styles/animations.css" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav class="navbar" id="navbar">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-brand">
+        <span class="brand-icon">⬡</span>
+        <span class="brand-text">DCMS</span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="index.html" class="active">Home</a></li>
+        <li><a href="#how-it-works">How It Works</a></li>
+        <li><a href="#features">Features</a></li>
+        <li><a href="#platform">About</a></li>
+      </ul>
+      <div class="nav-actions">
+        <a href="login.html" class="btn-ghost">Sign In</a>
+        <a href="register.html" class="btn-primary">Register</a>
+      </div>
+      <button class="hamburger" id="hamburger" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero" style="position:relative;">
+    <div class="hero-bg">
+      <div class="grid-overlay"></div>
+      <div class="orb orb-1"></div>
+      <div class="orb orb-2"></div>
+    </div>
+    <div class="hero-content">
+
+      <h1 class="hero-title">
+        Digital Complaint<br/>
+        <em>Management System</em>
+      </h1>
+      <p class="hero-desc">
+        A structured, database-driven platform for submitting, tracking, and resolving complaints — built for transparency, accountability, and efficiency.
+      </p>
+      <div class="hero-cta">
+        <a href="login.html" class="btn-primary btn-lg">Get Started →</a>
+        <a href="login.html" class="btn-outline btn-lg">Sign In</a>
+      </div>
+      <div class="hero-stats">
+        <div class="stat">
+          <span class="stat-num" data-target="2923000">0</span>
+          <span class="stat-label">Grievances Received (2024)</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat">
+          <span class="stat-num" data-target="90">0</span><span class="stat-suffix">.5%</span>
+          <span class="stat-label">Redressal Rate · CPGRAMS</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat">
+          <span class="stat-num" data-target="15">0</span><span class="stat-suffix"> days</span>
+          <span class="stat-label">Avg. Disposal Time</span>
+        </div>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="card-stack">
+        <div class="float-card fc-1">
+          <span class="fc-tag resolved">✓ Resolved</span>
+          <p class="fc-id">#CMP-2401001</p>
+          <p class="fc-title">Pothole — MG Road, Bengaluru</p>
+        </div>
+        <div class="float-card fc-2">
+          <span class="fc-tag pending">◐ In Progress</span>
+          <p class="fc-id">#CMP-2410023</p>
+          <p class="fc-title">Road Damage — Rajajinagar</p>
+        </div>
+        <div class="float-card fc-3">
+          <span class="fc-tag new">● Open</span>
+          <p class="fc-id">#CMP-2411261</p>
+          <p class="fc-title">No Water Supply — Hennur Layout</p>
+        </div>
+      </div>
+    </div>
+    <div class="scroll-hint">Scroll to explore ↓</div>
+  </section>
+
+  <!-- FEATURES -->
+  <section class="features section" id="features">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Core Features</span>
+        <h2 class="section-title">Everything you need,<br/> nothing you don't</h2>
+      </div>
+      <div class="features-grid">
+
+                <div class="feature-card fc-large">
+          <div class="feature-icon">&#9997;&#65039;</div>
+          <h3>Easy Complaint Filing</h3>
+          <p>Submit a complaint in minutes through a guided 4-step form &mdash; fill in your details, select a category, attach supporting evidence, and review before submitting. Each complaint gets a unique tracking ID instantly upon submission.</p>
+          <ul class="feature-list">
+            <li>Guided multi-step form with validation</li>
+            <li>Drag-and-drop file attachments</li>
+            <li>Instant unique Complaint ID on submit</li>
+          </ul>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">&#128269;</div>
+          <h3>Real-time Status Tracking</h3>
+          <p>Track your complaint anytime using your Complaint ID. View the full resolution timeline, officer remarks, and live status updates &mdash; no phone calls needed.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">&#128272;</div>
+          <h3>Three-Role Portal</h3>
+          <p>Dedicated dashboards for Citizens, Officers, and Admins. Each role sees exactly what they need &mdash; file and track, manage and resolve, or oversee the whole system.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">&#128202;</div>
+          <h3>Live Analytics Dashboard</h3>
+          <p>Real-time KPI cards, monthly complaint trend charts, category breakdowns, and department workload bars &mdash; giving admins complete operational visibility at a glance.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">&#128276;</div>
+          <h3>Automated Escalation Alerts</h3>
+          <p>Complaints that exceed their SLA deadline are automatically escalated to department heads. Citizens receive notifications at every stage of the resolution process.</p>
+        </div>
+
+        <div class="feature-card fc-large">
+          <div class="feature-icon">&#127959;&#65039;</div>
+          <h3>Smart Department Routing</h3>
+          <p>When a complaint is submitted, the system automatically identifies the right government department based on the selected category and assigns it to the appropriate officer &mdash; no manual sorting needed. Officers are notified instantly and can act right away.</p>
+          <div class="feature-badge-row">
+            <span class="badge">Auto-assignment</span>
+            <span class="badge">9 Categories</span>
+            <span class="badge">6 Departments</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="how-it-works section">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Process</span>
+        <h2 class="section-title">From complaint to resolution</h2>
+      </div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">01</div>
+          <div class="step-body">
+            <h3>Register & Submit</h3>
+            <p>Citizens create a verified account and file a complaint with category, description, location, and supporting documents.</p>
+          </div>
+        </div>
+        <div class="step-arrow">→</div>
+        <div class="step">
+          <div class="step-num">02</div>
+          <div class="step-body">
+            <h3>Auto-Assigned</h3>
+            <p>The system automatically routes the complaint to the right government department and officer based on the selected category and complaint priority.</p>
+          </div>
+        </div>
+        <div class="step-arrow">→</div>
+        <div class="step">
+          <div class="step-num">03</div>
+          <div class="step-body">
+            <h3>Investigation</h3>
+            <p>Officers review the complaint, update its status, add remarks at each step, and escalate if required. Citizens can see every update in real-time.</p>
+          </div>
+        </div>
+        <div class="step-arrow">→</div>
+        <div class="step">
+          <div class="step-num">04</div>
+          <div class="step-body">
+            <h3>Resolution & Feedback</h3>
+            <p>Citizens receive notification on resolution and submit a satisfaction rating, feeding back into officer performance data.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PLATFORM OVERVIEW -->
+  <section class="schema-section section">
+    <div class="container">
+      <div class="schema-inner">
+        <div class="schema-text">
+          <span class="section-tag">Platform Overview</span>
+          <h2>Built for citizens, officers &amp; administrators</h2>
+          <p>DCMS is a structured online platform that connects citizens directly to government departments. Every complaint is recorded, routed, tracked, and resolved through a clear, transparent process &mdash; giving all parties full visibility at every step.</p>
+          <ul class="schema-highlights">
+            <li><span class="mono">Citizen Portal</span> &mdash; File complaints, track status, submit feedback</li>
+            <li><span class="mono">Officer Portal</span> &mdash; Manage assigned complaints, update status, add remarks</li>
+            <li><span class="mono">Admin Dashboard</span> &mdash; Oversee all departments, users, and system analytics</li>
+            <li><span class="mono">Auto-Routing Engine</span> &mdash; Assigns each complaint to the right department instantly</li>
+            <li><span class="mono">Full Audit Trail</span> &mdash; Every status change is timestamped and logged</li>
+            <li><span class="mono">Feedback System</span> &mdash; Citizens rate resolutions; feeds officer performance data</li>
+          </ul>
+          <a href="dashboard.html" class="btn-primary mt-1">Explore the Dashboard &rarr;</a>
+        </div>
+        <div class="schema-diagram">
+          <div class="db-table">
+            <div class="db-header">Complaint Lifecycle</div>
+            <div class="db-row pk">&#128221; Citizen files complaint</div>
+            <div class="db-row fk">&#127959; Auto-assigned to department</div>
+            <div class="db-row fk">&#128110; Officer investigates</div>
+            <div class="db-row">&#128260; Status updated in real-time</div>
+            <div class="db-row">&#128276; Escalated if SLA breached</div>
+            <div class="db-row" style="color:var(--green);">&#10003; Resolved &amp; closed</div>
+            <div class="db-row">&#11088; Citizen submits rating</div>
+          </div>
+          <div class="db-connector"></div>
+          <div class="db-mini-tables">
+            <div class="db-table sm">
+              <div class="db-header">Portals</div>
+              <div class="db-row pk">&#128100; Citizen</div>
+              <div class="db-row">&#127962; Officer</div>
+              <div class="db-row">&#9881;&#65039; Admin</div>
+            </div>
+            <div class="db-table sm">
+              <div class="db-header">Key Features</div>
+              <div class="db-row pk">&#128269; Live Tracking</div>
+              <div class="db-row">&#128202; Analytics</div>
+              <div class="db-row">&#128276; Escalation</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- TESTIMONIAL / QUOTE -->
+  <section class="quote-section">
+    <div class="container">
+      <blockquote>
+        "Transparency is the foundation of trust. DCMS ensures every grievance is heard, tracked, and resolved — with data integrity at every step."
+      </blockquote>
+      <cite>— Digital Governance Initiative</cite>
+    </div>
+  </section>
+
+  <!-- CTA BANNER -->
+  <section class="cta-section section">
+    <div class="container">
+      <div class="cta-box">
+        <h2>Ready to file or track a complaint?</h2>
+        <p>Join thousands of citizens using DCMS for transparent, accountable grievance redressal.</p>
+        <div class="cta-btns">
+          <a href="register.html" class="btn-primary btn-lg">Get Started — It's Free</a>
+          <a href="dashboard.html" class="btn-ghost btn-lg">View Live Dashboard</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="brand-mark">⬡ DCMS</div>
+          <p>A database-driven complaint management system for efficient, transparent, and accountable grievance resolution.</p>
+          <p class="footer-sub">Transparent · Accountable · Efficient</p>
+        </div>
+        <div class="footer-col">
+          <h4>Platform</h4>
+          <ul>
+            <li><a href="file-complaint.html">File Complaint</a></li>
+            <li><a href="track.html">Track Status</a></li>
+            <li><a href="dashboard.html">Dashboard</a></li>
+            <li><a href="reports.html">Reports</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Account</h4>
+          <ul>
+            <li><a href="register.html">Register</a></li>
+            <li><a href="login.html">Sign In</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Project</h4>
+          <ul>
+            <li><a href="reports.html">ER Diagram</a></li>
+            <li><a href="reports.html">Schema</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2024 DCMS — Digital Complaint Management System</span>
+        <span>Transparency · Speed · Accountability</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/api.js"></script><script src="js/auth.js"></script>
+  <script src="js/main.js"></script>
+  <script>dcmsUpdateNav();</script>
+  <script>
+  // Smart CTA — sends logged-in users to dashboard
+  function dcmsHeroAction() {
+    if (isLoggedIn()) {
+      const u = dcmsGetUser();
+      const m = {citizen:'citizen-dashboard.html', officer:'officer-dashboard.html', admin:'dashboard.html'};
+      window.location.href = m[u.role] || 'citizen-dashboard.html';
+    } else {
+      window.location.href = 'register.html';
+    }
+  }
+  // Patch hero buttons
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('a[href="register.html"].btn-primary').forEach(a => {
+      a.addEventListener('click', e => { e.preventDefault(); dcmsHeroAction(); });
+    });
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Users — DCMS</title>
+  <link rel="stylesheet" href="styles/main.css"/>
+  <link rel="stylesheet" href="styles/animations.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    .dash-layout{display:flex;min-height:calc(100vh - 66px);padding-top:66px;}
+    .sidebar{width:240px;flex-shrink:0;background:var(--bg-card);border-right:1px solid var(--border);padding:32px 0;position:sticky;top:66px;height:calc(100vh - 66px);overflow-y:auto;}
+    .sidebar-section{margin-bottom:28px;}
+    .sidebar-label{font-size:.7rem;text-transform:uppercase;letter-spacing:.12em;color:var(--text-d);padding:0 20px;margin-bottom:8px;}
+    .sidebar-link{display:flex;align-items:center;gap:10px;padding:10px 20px;font-size:.9rem;color:var(--text-m);transition:color .2s,background .2s;border-left:3px solid transparent;}
+    .sidebar-link:hover,.sidebar-link.active{color:var(--text);background:rgba(255,255,255,.04);}
+    .sidebar-link.active{border-left-color:var(--accent);background:rgba(47,128,237,.07);color:var(--accent);}
+    .sidebar-icon{font-size:1rem;width:20px;text-align:center;}
+    .dash-main{flex:1;padding:40px;overflow-x:hidden;}
+    .page-topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:28px;flex-wrap:wrap;gap:16px;}
+    .page-topbar h1{font-family:var(--font-h);font-size:1.8rem;}
+    .page-topbar p{color:var(--text-m);font-size:.9rem;margin-top:2px;}
+    .role-badge{display:inline-flex;align-items:center;font-size:.75rem;font-weight:600;padding:3px 10px;border-radius:12px;}
+    .role-citizen{background:rgba(47,128,237,.12);color:var(--accent);}
+    .role-officer{background:rgba(86,207,178,.12);color:var(--accent-s);}
+    .role-admin{background:rgba(232,184,75,.12);color:var(--gold);}
+    .user-info{display:flex;align-items:center;gap:10px;}
+    .user-avatar{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.88rem;font-weight:700;flex-shrink:0;}
+    .av-c{background:rgba(47,128,237,.2);color:var(--accent);}
+    .av-o{background:rgba(86,207,178,.2);color:var(--accent-s);}
+    .av-a{background:rgba(232,184,75,.2);color:var(--gold);}
+    .u-name{font-weight:500;color:var(--text);font-size:.9rem;}
+    .u-email{font-size:.75rem;color:var(--text-d);font-family:var(--font-m);}
+    .act-btn{background:none;border:none;cursor:pointer;color:var(--text-d);font-size:.82rem;padding:4px 8px;border-radius:6px;transition:all .2s;}
+    .act-btn:hover{color:var(--accent);background:rgba(47,128,237,.1);}
+    .act-btn.del:hover{color:var(--red);background:rgba(248,113,113,.1);}
+    .filter-row{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap;align-items:center;}
+    .rf-btn{padding:7px 16px;border-radius:20px;font-size:.8rem;font-weight:500;border:1px solid var(--border);background:none;color:var(--text-m);cursor:pointer;transition:all .2s;}
+    .rf-btn.active,.rf-btn:hover{background:rgba(47,128,237,.1);border-color:rgba(47,128,237,.4);color:var(--accent);}
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);z-index:200;display:none;align-items:center;justify-content:center;}
+    .modal-overlay.open{display:flex;animation:fadeIn .2s ease;}
+    .modal{background:var(--bg-card2);border:1px solid var(--border-l);border-radius:var(--radius-l);width:100%;max-width:520px;padding:36px;box-shadow:var(--shadow);position:relative;}
+    .modal-title{font-family:var(--font-h);font-size:1.4rem;margin-bottom:4px;}
+    .modal-sub{color:var(--text-m);font-size:.88rem;margin-bottom:24px;}
+    .modal-footer{display:flex;justify-content:flex-end;gap:10px;margin-top:24px;}
+    .modal-close-btn{position:absolute;top:16px;right:16px;background:none;border:none;color:var(--text-d);cursor:pointer;font-size:1.1rem;padding:4px;}
+    .tbl-wrap{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-l);overflow:hidden;}
+    .tbl-footer{padding:14px 24px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;font-size:.82rem;color:var(--text-d);}
+    @media(max-width:700px){.sidebar{display:none;}.dash-main{padding:20px 16px;}}
+  </style>
+</head>
+<body>
+  <nav class="navbar" id="navbar">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-brand"><span class="brand-icon">⬡</span><span class="brand-text">DCMS</span></a>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="dashboard.html">Dashboard</a></li>
+        <li><a href="file-complaint.html">File Complaint</a></li>
+        <li><a href="track.html">Track</a></li>
+        <li><a href="reports.html">Reports</a></li>
+      </ul>
+      <div class="nav-actions">
+        <a href="login.html" class="btn-ghost">Sign In</a>
+        <a href="register.html" class="btn-primary">Register</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="dash-layout">
+    <aside class="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-label">Main</div>
+        <a href="dashboard.html" class="sidebar-link"><span class="sidebar-icon">📊</span> Dashboard</a>
+        <a href="file-complaint.html" class="sidebar-link"><span class="sidebar-icon">✍️</span> File Complaint</a>
+        <a href="track.html" class="sidebar-link"><span class="sidebar-icon">🔍</span> Track Status</a>
+        <a href="reports.html" class="sidebar-link"><span class="sidebar-icon">📋</span> Reports</a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-label">Management</div>
+        <a href="users.html" class="sidebar-link active"><span class="sidebar-icon">👥</span> Users</a>
+        <a href="departments.html" class="sidebar-link"><span class="sidebar-icon">🏢</span> Departments</a>
+        <a href="categories.html" class="sidebar-link"><span class="sidebar-icon">🏷️</span> Categories</a>
+        <a href="settings.html" class="sidebar-link"><span class="sidebar-icon">⚙️</span> Settings</a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-label">Account</div>
+        <a href="profile.html" class="sidebar-link"><span class="sidebar-icon">👤</span> My Profile</a>
+        <a href="login.html" class="sidebar-link"><span class="sidebar-icon">🚪</span> Logout</a>
+      </div>
+    </aside>
+
+    <main class="dash-main">
+      <div class="page-topbar">
+        <div><h1>User Management</h1><p>Manage citizen, officer, and admin accounts.</p></div>
+        <button class="btn-primary" onclick="openModal('Add New User')">+ Add User</button>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:28px;">
+        <div class="card reveal" style="display:flex;align-items:center;gap:16px;">
+          <div style="width:44px;height:44px;border-radius:12px;background:rgba(47,128,237,.15);display:flex;align-items:center;justify-content:center;font-size:1.3rem;">👤</div>
+          <div><div style="font-family:var(--font-h);font-size:1.8rem;" data-target="1048">0</div><div style="font-size:.8rem;color:var(--text-d);">Citizens</div></div>
+        </div>
+        <div class="card reveal reveal-d1" style="display:flex;align-items:center;gap:16px;">
+          <div style="width:44px;height:44px;border-radius:12px;background:rgba(86,207,178,.15);display:flex;align-items:center;justify-content:center;font-size:1.3rem;">🏢</div>
+          <div><div style="font-family:var(--font-h);font-size:1.8rem;" data-target="24">0</div><div style="font-size:.8rem;color:var(--text-d);">Officers</div></div>
+        </div>
+        <div class="card reveal reveal-d2" style="display:flex;align-items:center;gap:16px;">
+          <div style="width:44px;height:44px;border-radius:12px;background:rgba(232,184,75,.15);display:flex;align-items:center;justify-content:center;font-size:1.3rem;">⚙️</div>
+          <div><div style="font-family:var(--font-h);font-size:1.8rem;" data-target="3">0</div><div style="font-size:.8rem;color:var(--text-d);">Admins</div></div>
+        </div>
+      </div>
+
+      <div class="filter-row reveal">
+        <input type="text" class="form-input" style="flex:1;max-width:300px;" placeholder="Search name or email..." oninput="searchUsers(this.value)"/>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          <button class="rf-btn active" onclick="filterRole('all',this)">All</button>
+          <button class="rf-btn" onclick="filterRole('citizen',this)">Citizens</button>
+          <button class="rf-btn" onclick="filterRole('officer',this)">Officers</button>
+          <button class="rf-btn" onclick="filterRole('admin',this)">Admins</button>
+        </div>
+      </div>
+
+      <div class="tbl-wrap reveal">
+        <table class="data-table" id="usersTable">
+          <thead>
+            <tr><th>User</th><th>Role</th><th>Department</th><th>Activity</th><th>Joined</th><th>Status</th><th>Actions</th></tr>
+          </thead>
+          <tbody>
+            <tr data-role="admin">
+              <td><div class="user-info"><div class="user-avatar av-a">A</div><div><div class="u-name">Admin User</div><div class="u-email">admin@dcms.gov.in</div></div></div></td>
+              <td><span class="role-badge role-admin">⚙️ Admin</span></td><td>All Depts.</td><td>—</td><td>2024-01-01</td>
+              <td><span class="status-badge status-resolved">● Active</span></td>
+              <td><button class="act-btn" onclick="openModal('Edit — Admin User')">✏️</button> <button class="act-btn del" onclick="confirmDel(this)">🗑️</button></td>
+            </tr>
+            <tr data-role="officer">
+              <td><div class="user-info"><div class="user-avatar av-o">R</div><div><div class="u-name">Ravi Kumar</div><div class="u-email">ravi.k@dcms.gov.in</div></div></div></td>
+              <td><span class="role-badge role-officer">🏢 Officer</span></td><td>Infrastructure</td><td>32 assigned</td><td>2024-03-15</td>
+              <td><span class="status-badge status-resolved">● Active</span></td>
+              <td><button class="act-btn" onclick="openModal('Edit — Ravi Kumar')">✏️</button> <button class="act-btn del" onclick="confirmDel(this)">🗑️</button></td>
+            </tr>
+            <tr data-role="officer">
+              <td><div class="user-info"><div class="user-avatar av-o">P</div><div><div class="u-name">Priya S.</div><div class="u-email">priya.s@dcms.gov.in</div></div></div></td>
+              <td><span class="role-badge role-officer">🏢 Officer</span></td><td>Billing</td><td>24 assigned</td><td>2024-03-20</td>
+              <td><span class="status-badge status-resolved">● Active</span></td>
+              <td><button class="act-btn" onclick="openModal('Edit — Priya S.')">✏️</button> <button class="act-btn del" onclick="confirmDel(this)">🗑️</button></td>
+            </tr>
+            <tr data-role="officer">
+              <td><div class="user-info"><div class="user-avatar av-o">A</div><div><div class="u-name">Anil Mehta</div><div class="u-email">anil.m@dcms.gov.in</div></div></div></td>
+              <td><span class="role-badge role-officer">🏢 Officer</span></td><td>Roads</td><td>18 assigned</td><td>2024-04-01</td>
+              <td><span class="status-badge status-resolved">● Active</span></td>
+              <td><button class="act-btn" onclick="openModal('Edit — Anil Mehta')">✏️</button> <button class="act-btn del" onclick="confirmDel(this)">🗑️</button></td>
+            </tr>
+            <tr data-role="citizen">
+              <td><div class="user-info"><div class="user-avatar av-c">J</div><div><div class="u-name">John Doe</div><div class="u-email">john.doe@email.com</div></div></div></td>
+              <td><span class="role-badge role-citizen">👤 Citizen</span></td><td>—</td><td>3 filed</td><td>2024-09-12</td>
+              <td><span class="status-badge status-resolved">● Active</span></td>
+              <td><button class="act-btn" onclick="openModal('Edit — John Doe')">✏️</button> <button class="act-btn del" onclick="confirmDel(this)">🗑️</button></td>
+            </tr>
+            <tr data-role="citizen">
+              <td><div class="user-info"><div class="user-avatar av-c">S</div><div><div class="u-name">Sunita Rao</div><div class="u-email">sunita.r@email.com</div></div></div></td>
+              <td><span class="role-badge role-citizen">👤 Citizen</span></td><td>—</td><td>7 filed</td><td>2024-10-03</td>
+              <td><span class="status-badge status-resolved">● Active</span></td>
+              <td><button class="act-btn" onclick="openModal('Edit — Sunita Rao')">✏️</button> <button class="act-btn del" onclick="confirmDel(this)">🗑️</button></td>
+            </tr>
+            <tr data-role="citizen">
+              <td><div class="user-info"><div class="user-avatar av-c">M</div><div><div class="u-name">Mohan Verma</div><div class="u-email">mohan.v@email.com</div></div></div></td>
+              <td><span class="role-badge role-citizen">👤 Citizen</span></td><td>—</td><td>1 filed</td><td>2024-10-18</td>
+              <td><span class="status-badge status-open">● Suspended</span></td>
+              <td><button class="act-btn" onclick="openModal('Edit — Mohan Verma')">✏️</button> <button class="act-btn del" onclick="confirmDel(this)">🗑️</button></td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="tbl-footer">
+          <span>Showing 7 of 1,075 users</span>
+          <div style="display:flex;gap:6px;">
+            <button class="rf-btn active">1</button>
+            <button class="rf-btn">2</button>
+            <button class="rf-btn">3</button>
+            <button class="rf-btn">→</button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="modal-overlay" id="userModal">
+    <div class="modal">
+      <button class="modal-close-btn" onclick="closeModal()">✕</button>
+      <div class="modal-title" id="modalTitle">Add New User</div>
+      <div class="modal-sub">Create account and assign role &amp; department.</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;">
+        <div class="form-group" style="margin:0;"><label class="form-label">First Name</label><input type="text" class="form-input" placeholder="First name"/></div>
+        <div class="form-group" style="margin:0;"><label class="form-label">Last Name</label><input type="text" class="form-input" placeholder="Last name"/></div>
+      </div>
+      <div class="form-group"><label class="form-label">Email Address</label><input type="email" class="form-input" placeholder="user@dcms.gov.in"/></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+        <div class="form-group" style="margin:0;"><label class="form-label">Role</label>
+          <select class="form-select"><option>citizen</option><option>officer</option><option>admin</option></select></div>
+        <div class="form-group" style="margin:0;"><label class="form-label">Department</label>
+          <select class="form-select"><option value="">— N/A —</option><option>Infrastructure</option><option>Billing</option><option>Roads</option><option>Utilities</option><option>Sanitation</option></select></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-ghost" onclick="closeModal()">Cancel</button>
+        <button class="btn-primary" onclick="saveUser()">Save User</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script><script src="js/auth.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/main.js"></script>
+  <script>
+    function openModal(title) { document.getElementById('modalTitle').textContent = title; document.getElementById('userModal').classList.add('open'); }
+    function closeModal() { document.getElementById('userModal').classList.remove('open'); }
+    function saveUser() { closeModal(); showToast('User saved successfully!', 'success'); }
+    function confirmDel(btn) { if(confirm('Delete this user?')) { btn.closest('tr').remove(); showToast('User deleted.', 'info'); } }
+    function filterRole(role, btn) {
+      document.querySelectorAll('.rf-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active');
+      document.querySelectorAll('#usersTable tbody tr').forEach(row => { row.style.display = (role==='all'||row.dataset.role===role)?'':'none'; });
+    }
+    function searchUsers(q) {
+      const s = q.toLowerCase();
+      document.querySelectorAll('#usersTable tbody tr').forEach(row => { row.style.display = row.textContent.toLowerCase().includes(s)?'':'none'; });
+    }
+    document.getElementById('userModal').addEventListener('click', function(e) { if(e.target===this) closeModal(); });
+  </script>
+  <script>requireAuth(); dcmsUpdateNav();</script>
+</body>
+</html>

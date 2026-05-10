@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sign In — DCMS</title>
+  <link rel="stylesheet" href="styles/main.css"/>
+  <link rel="stylesheet" href="styles/animations.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *{box-sizing:border-box;} body{margin:0;}
+    .auth-layout{min-height:100vh;display:flex;}
+
+    /* ── LEFT PANEL ── */
+    .auth-left{
+      flex:1; position:relative; overflow:hidden;
+      background:linear-gradient(135deg,#050d1c 0%,#091525 60%,#0a1a2e 100%);
+      border-right:1px solid rgba(47,128,237,.18);
+      display:flex; flex-direction:column; padding:36px 40px;
+    }
+    #authCanvas{position:absolute;inset:0;z-index:0;pointer-events:none;}
+
+    /* Glowing orbs */
+    .orb{position:absolute;border-radius:50%;pointer-events:none;z-index:1;}
+    .orb1{width:360px;height:360px;top:-100px;left:-100px;
+      background:radial-gradient(circle,rgba(47,128,237,.28) 0%,transparent 70%);
+      animation:orbDrift1 12s ease-in-out infinite;}
+    .orb2{width:280px;height:280px;bottom:-80px;right:-60px;
+      background:radial-gradient(circle,rgba(86,207,178,.22) 0%,transparent 70%);
+      animation:orbDrift2 16s ease-in-out infinite;}
+    .orb3{width:200px;height:200px;top:40%;left:30%;
+      background:radial-gradient(circle,rgba(251,191,36,.12) 0%,transparent 70%);
+      animation:orbDrift3 10s ease-in-out infinite;}
+    @keyframes orbDrift1{0%,100%{transform:translate(0,0);}50%{transform:translate(40px,30px);}}
+    @keyframes orbDrift2{0%,100%{transform:translate(0,0);}50%{transform:translate(-30px,-40px);}}
+    @keyframes orbDrift3{0%,100%{transform:translate(0,0);}50%{transform:translate(20px,-20px);}}
+
+    .auth-brand{position:relative;z-index:5;display:flex;align-items:center;gap:10px;margin-bottom:0;}
+    .auth-brand-icon{font-size:1.6rem;color:#2f80ed;text-shadow:0 0 20px rgba(47,128,237,.6);}
+    .auth-brand-text{font-family:'JetBrains Mono',monospace;font-size:1.1rem;color:#2f80ed;letter-spacing:.05em;}
+
+    /* ── SCENE (central animated area) ── */
+    .scene{flex:1;position:relative;z-index:3;display:flex;align-items:center;justify-content:center;}
+    .scene-inner{position:relative;width:320px;height:320px;}
+
+    /* Rotating rings */
+    .ring{position:absolute;border-radius:50%;border:1px solid;top:50%;left:50%;}
+    .ring1{width:130px;height:130px;margin:-65px 0 0 -65px;border-color:rgba(47,128,237,.4);animation:ringCW 14s linear infinite;}
+    .ring2{width:200px;height:200px;margin:-100px 0 0 -100px;border-color:rgba(86,207,178,.25);border-style:dashed;animation:ringCCW 22s linear infinite;}
+    .ring3{width:280px;height:280px;margin:-140px 0 0 -140px;border-color:rgba(251,191,36,.15);animation:ringCW 36s linear infinite;}
+    @keyframes ringCW{to{transform:rotate(360deg);}}
+    @keyframes ringCCW{to{transform:rotate(-360deg);}}
+
+    /* Hub */
+    .hub{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:6;
+      width:82px;height:82px;border-radius:50%;
+      background:linear-gradient(135deg,rgba(47,128,237,.35),rgba(86,207,178,.2));
+      border:2px solid rgba(47,128,237,.6);display:flex;align-items:center;justify-content:center;
+      font-size:1.9rem;color:#2f80ed;
+      box-shadow:0 0 0 0 rgba(47,128,237,.5);
+      animation:hubGlow 3s ease-in-out infinite;}
+    @keyframes hubGlow{
+      0%,100%{box-shadow:0 0 20px rgba(47,128,237,.4),0 0 0 0 rgba(47,128,237,.2);}
+      50%{box-shadow:0 0 50px rgba(47,128,237,.6),0 0 80px rgba(47,128,237,.1);}
+    }
+
+    /* Orbit dots */
+    .orbit-dot{position:absolute;width:10px;height:10px;border-radius:50%;
+      top:50%;left:50%;transform-origin:0 0;}
+
+    /* Floating complaint cards */
+    .fcard{position:absolute;z-index:7;
+      background:rgba(9,18,34,.92);backdrop-filter:blur(14px);
+      border:1px solid;border-radius:14px;padding:11px 15px;min-width:155px;
+      box-shadow:0 8px 32px rgba(0,0,0,.4);}
+    .fcard-id{font-family:'JetBrains Mono',monospace;font-size:.68rem;margin-bottom:3px;}
+    .fcard-ttl{font-size:.82rem;font-weight:600;color:#e2e8f0;margin-bottom:5px;}
+    .fcard-bdg{font-size:.65rem;padding:2px 9px;border-radius:10px;font-weight:600;}
+
+    /* Card positions + individual float animations */
+    .fc1{top:2%;left:-8%;border-color:rgba(47,128,237,.45);animation:float1 5s ease-in-out infinite;}
+    .fc2{top:6%;right:-6%;border-color:rgba(52,211,153,.4);animation:float2 6.5s ease-in-out infinite;}
+    .fc3{bottom:10%;left:-5%;border-color:rgba(251,191,36,.4);animation:float3 7s ease-in-out infinite;}
+    .fc4{bottom:6%;right:-4%;border-color:rgba(248,113,113,.4);animation:float4 5.8s ease-in-out infinite;}
+    @keyframes float1{0%,100%{transform:translateY(0) rotate(-1deg);}50%{transform:translateY(-12px) rotate(1deg);}}
+    @keyframes float2{0%,100%{transform:translateY(0) rotate(1deg);}50%{transform:translateY(-10px) rotate(-1deg);}}
+    @keyframes float3{0%,100%{transform:translateY(0) rotate(1deg);}50%{transform:translateY(-14px) rotate(-2deg);}}
+    @keyframes float4{0%,100%{transform:translateY(0) rotate(-1deg);}50%{transform:translateY(-8px) rotate(1deg);}}
+
+    /* Connecting lines (SVG overlay) */
+    .conn-svg{position:absolute;inset:0;pointer-events:none;z-index:4;}
+
+    /* Live badge */
+    .live-badge{
+      display:inline-flex;align-items:center;gap:8px;
+      background:rgba(9,18,34,.9);border:1px solid rgba(52,211,153,.4);
+      border-radius:30px;padding:6px 16px;font-size:.73rem;color:#34d399;
+      position:absolute;top:0%;left:50%;transform:translateX(-50%);z-index:9;
+      white-space:nowrap;animation:float1 5s ease-in-out infinite;
+    }
+    .live-dot{width:7px;height:7px;background:#34d399;border-radius:50%;
+      box-shadow:0 0 8px #34d399;animation:hubGlow 1.5s ease-in-out infinite;flex-shrink:0;}
+
+    /* ── TAGLINE ── */
+    .auth-tagline{position:relative;z-index:5;margin-top:24px;}
+    .auth-tagline h2{font-family:'DM Serif Display',serif;font-size:1.7rem;line-height:1.3;
+      margin-bottom:8px;color:#e2e8f0;}
+    .auth-tagline h2 em{color:#2f80ed;font-style:italic;}
+    .auth-tagline p{color:#6b809a;font-size:.85rem;margin-bottom:14px;}
+    .stats-row{display:flex;gap:0;}
+    .stat-s{padding:12px 18px;border-right:1px solid rgba(47,128,237,.15);}
+    .stat-s:last-child{border-right:none;}
+    .stat-s-val{font-family:'DM Serif Display',serif;font-size:1.35rem;
+      background:linear-gradient(90deg,#2f80ed,#56cfb2);
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+    .stat-s-lbl{font-size:.67rem;color:#6b809a;text-transform:uppercase;letter-spacing:.07em;}
+
+    /* ── RIGHT PANEL ── */
+    .auth-right{width:480px;flex-shrink:0;display:flex;align-items:center;justify-content:center;padding:48px 44px;overflow-y:auto;}
+    .auth-form-box{width:100%;}
+    .auth-form-box h1{font-family:'DM Serif Display',serif;font-size:2rem;margin-bottom:6px;}
+    .auth-form-box p.sub{color:var(--text-m);font-size:.9rem;margin-bottom:28px;}
+    .role-tabs{display:flex;background:var(--bg-card2);border:1px solid var(--border);border-radius:10px;padding:4px;gap:4px;margin-bottom:24px;}
+    .role-tab{flex:1;text-align:center;padding:9px;border-radius:7px;font-size:.85rem;font-weight:500;cursor:pointer;color:var(--text-m);transition:all .2s;}
+    .role-tab.active{background:var(--accent);color:#fff;box-shadow:0 2px 10px rgba(47,128,237,.3);}
+    .divider{display:flex;align-items:center;gap:14px;margin:18px 0;color:var(--text-d);font-size:.8rem;}
+    .divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border);}
+    .demo-btn{width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;background:none;color:var(--text-m);font-family:var(--font-b);font-size:.88rem;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:8px;}
+    .demo-btn:hover{border-color:var(--border-l);background:rgba(255,255,255,.04);color:var(--text);}
+    @media(max-width:900px){.auth-left{display:none;}.auth-right{width:100%;padding:48px 24px;}}
+  </style>
+</head>
+<body>
+  <div class="auth-layout">
+
+    <!-- ── LEFT PANEL ── -->
+    <div class="auth-left">
+      <canvas id="authCanvas"></canvas>
+      <div class="orb orb1"></div>
+      <div class="orb orb2"></div>
+      <div class="orb orb3"></div>
+
+      <div class="auth-brand">
+        <span class="auth-brand-icon">⬡</span>
+        <span class="auth-brand-text">DCMS</span>
+      </div>
+
+      <div class="scene">
+        <div class="scene-inner">
+          <!-- SVG connecting lines -->
+          <svg class="conn-svg" viewBox="0 0 320 320">
+            <line x1="160" y1="160" x2="60" y2="50"  stroke="rgba(47,128,237,.2)" stroke-width="1" stroke-dasharray="5 4"/>
+            <line x1="160" y1="160" x2="265" y2="55" stroke="rgba(52,211,153,.2)" stroke-width="1" stroke-dasharray="5 4"/>
+            <line x1="160" y1="160" x2="55" y2="270" stroke="rgba(251,191,36,.2)" stroke-width="1" stroke-dasharray="5 4"/>
+            <line x1="160" y1="160" x2="268" y2="272" stroke="rgba(248,113,113,.2)" stroke-width="1" stroke-dasharray="5 4"/>
+          </svg>
+
+          <!-- Rings -->
+          <div class="ring ring1"></div>
+          <div class="ring ring2"></div>
+          <div class="ring ring3"></div>
+
+          <!-- Hub -->
+          <div class="hub">⬡</div>
+
+          <!-- Floating orbit dots on rings -->
+          <div style="position:absolute;top:50%;left:50%;width:130px;height:130px;margin:-65px 0 0 -65px;border-radius:50%;animation:ringCW 14s linear infinite;">
+            <div style="position:absolute;top:-5px;left:50%;width:10px;height:10px;margin-left:-5px;background:#2f80ed;border-radius:50%;box-shadow:0 0 8px #2f80ed;"></div>
+          </div>
+          <div style="position:absolute;top:50%;left:50%;width:200px;height:200px;margin:-100px 0 0 -100px;border-radius:50%;animation:ringCCW 22s linear infinite;">
+            <div style="position:absolute;bottom:-5px;right:10px;width:8px;height:8px;background:#56cfb2;border-radius:50%;box-shadow:0 0 8px #56cfb2;"></div>
+          </div>
+
+          <!-- Floating complaint cards -->
+          <div class="fcard fc1">
+            <div class="fcard-id" style="color:#2f80ed;">#CMP-2411188</div>
+            <div class="fcard-ttl">Streetlight Failure — Bellandur</div>
+            <span class="fcard-bdg" style="background:rgba(47,128,237,.13);color:#2f80ed;border:1px solid rgba(47,128,237,.3);">● Open</span>
+          </div>
+          <div class="fcard fc2">
+            <div class="fcard-id" style="color:#34d399;">#CMP-2401042</div>
+            <div class="fcard-ttl">Garbage Not Collected — HSR</div>
+            <span class="fcard-bdg" style="background:rgba(52,211,153,.1);color:#34d399;border:1px solid rgba(52,211,153,.3);">✓ Resolved</span>
+          </div>
+          <div class="fcard fc3">
+            <div class="fcard-id" style="color:#fbbf24;">#CMP-2410089</div>
+            <div class="fcard-ttl">Billing Error — BESCOM Meter Swap</div>
+            <span class="fcard-bdg" style="background:rgba(251,191,36,.1);color:#fbbf24;border:1px solid rgba(251,191,36,.3);">◐ In Progress</span>
+          </div>
+          <div class="fcard fc4">
+            <div class="fcard-id" style="color:#f87171;">#CMP-2411134</div>
+            <div class="fcard-ttl">Borewell E.coli Contamination</div>
+            <span class="fcard-bdg" style="background:rgba(248,113,113,.1);color:#f87171;border:1px solid rgba(248,113,113,.3);">⚠ Critical</span>
+          </div>
+
+          <!-- Live system badge -->
+          <div class="live-badge">
+            <span class="live-dot"></span> System Online · 29.23 lakh grievances tracked · 2024
+          </div>
+        </div>
+      </div>
+
+      <div class="auth-tagline">
+        <h2>One platform.<br/><em>Every grievance resolved.</em></h2>
+        <p>File, track, and resolve complaints transparently — with real-time updates at every stage.</p>
+        <div class="stats-row">
+          <div class="stat-s"><div class="stat-s-val" id="sn1">0</div><div class="stat-s-lbl">Received</div></div>
+          <div class="stat-s"><div class="stat-s-val">90.5%</div><div class="stat-s-lbl">Redressed</div></div>
+          <div class="stat-s"><div class="stat-s-val">15 days</div><div class="stat-s-lbl">Avg. Days</div></div>
+          <div class="stat-s"><div class="stat-s-val">92</div><div class="stat-s-lbl">Ministries</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── RIGHT PANEL ── -->
+    <div class="auth-right">
+      <div class="auth-form-box">
+        <a href="index.html" style="font-family:var(--font-m);font-size:.85rem;color:var(--text-d);display:block;margin-bottom:28px;">← Back to Home</a>
+        <h1>Welcome back</h1>
+        <p class="sub">Sign in to your DCMS account.</p>
+
+        <div class="role-tabs">
+          <div class="role-tab active" onclick="setRole(this,'citizen')">👤 Citizen</div>
+          <div class="role-tab" onclick="setRole(this,'officer')">🏢 Officer</div>
+          <div class="role-tab" onclick="setRole(this,'admin')">⚙️ Admin</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Email Address</label>
+          <input type="email" class="form-input" id="loginEmail" placeholder="you@example.com" autocomplete="email"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label" style="display:flex;justify-content:space-between;">
+            Password <a href="#" style="color:var(--accent);font-size:.82rem;">Forgot password?</a>
+          </label>
+          <div style="position:relative;">
+            <input type="password" class="form-input" id="loginPass" placeholder="••••••••" style="padding-right:44px;"/>
+            <button onclick="togglePass()" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text-d);cursor:pointer;font-size:.9rem;">👁</button>
+          </div>
+        </div>
+
+        <div class="alert alert-info" id="loginAlert" style="margin-bottom:14px;display:none;"></div>
+        <button class="btn-primary" style="width:100%;padding:13px;font-size:1rem;" onclick="doLogin()">Sign In →</button>
+
+        <div class="divider">or use demo account</div>
+        <button class="demo-btn" onclick="demoLogin('citizen')">👤 Demo — Citizen Account</button>
+        <button class="demo-btn" onclick="demoLogin('officer')">🏢 Demo — Officer Account</button>
+        <button class="demo-btn" onclick="demoLogin('admin')">⚙️ Demo — Admin Account</button>
+
+        <p style="text-align:center;margin-top:24px;font-size:.88rem;color:var(--text-d);">
+          Don't have an account? <a href="register.html" style="color:var(--accent);">Register here →</a>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script><script src="js/auth.js"></script>
+  <script>
+    // Redirect if already logged in
+    if (isLoggedIn()) {
+      const u = dcmsGetUser();
+      const m = {citizen:'citizen-dashboard.html', officer:'officer-dashboard.html', admin:'dashboard.html'};
+      window.location.href = m[u.role] || 'citizen-dashboard.html';
+    }
+
+    let activeRole = 'citizen';
+    const roleRoutes = {citizen:'citizen-dashboard.html', officer:'officer-dashboard.html', admin:'dashboard.html'};
+
+    function setRole(el, role) {
+      document.querySelectorAll('.role-tab').forEach(t => t.classList.remove('active'));
+      el.classList.add('active'); activeRole = role;
+    }
+    function togglePass() {
+      const p = document.getElementById('loginPass');
+      p.type = p.type === 'password' ? 'text' : 'password';
+    }
+    async function doLogin() {
+      const email = document.getElementById('loginEmail').value.trim();
+      const pass  = document.getElementById('loginPass').value;
+      const al    = document.getElementById('loginAlert');
+      if (!email || !pass) {
+        al.style.display='flex'; al.className='alert alert-error';
+        al.textContent='⚠ Please enter your email and password.'; return;
+      }
+      al.style.display='flex'; al.className='alert alert-info';
+      al.textContent='🔄 Signing you in…';
+      try {
+        const result = await dcmsLogin(email, pass, activeRole);
+        if (result.success) {
+          al.className='alert alert-info';
+          al.textContent='✅ Login successful! Redirecting…';
+          setTimeout(() => window.location.href = roleRoutes[result.user.role] || roleRoutes[activeRole], 800);
+        } else {
+          al.className='alert alert-error';
+          al.textContent = '⚠ ' + (result.message || 'Invalid credentials.');
+        }
+      } catch (err) {
+        al.className='alert alert-error';
+        al.textContent = '⚠ Error: ' + err.message;
+      }
+    }
+    // Demo credentials match auth.js demo mode
+    const DEMO_CREDS = {
+      citizen: { email:'john@example.com',  pass:'citizen123' },
+      officer: { email:'riya@dcms.gov',     pass:'officer123' },
+      admin:   { email:'admin@dcms.gov',    pass:'admin123'   }
+    };
+    function demoLogin(role) {
+      document.querySelectorAll('.role-tab').forEach((t,i) =>
+        t.classList.toggle('active', ['citizen','officer','admin'][i] === role)
+      );
+      activeRole = role;
+      document.getElementById('loginEmail').value = DEMO_CREDS[role].email;
+      document.getElementById('loginPass').value  = DEMO_CREDS[role].pass;
+      // Instant demo redirect// Use real login with demo credentials
+      const al = document.getElementById('loginAlert');
+      al.style.display='flex'; al.className='alert alert-info';
+      al.textContent='🔄 Signing you in...';
+      
+      const email = document.getElementById('loginEmail').value;
+      const password = document.getElementById('loginPass').value;
+      
+      dcmsLogin(email, password, role).then(result => {
+        if (result.success) {
+          al.style.display='flex'; al.className='alert alert-success';
+          al.textContent='✅ Login successful! Redirecting...';
+          setTimeout(() => window.location.href = roleRoutes[activeRole], 1000);
+        } else {
+          al.style.display='flex'; al.className='alert alert-error';
+          al.textContent = result.message || '❌ Login failed. Please try again.';
+        }
+      }).catch(err => {
+        console.error('Login error:', err);
+        al.style.display='flex'; al.className='alert alert-error';
+        al.textContent = '❌ Connection error. Please try again.';
+      });
+    }
+
+    // ── Canvas particle network ──
+    (function() {
+      const canvas = document.getElementById('authCanvas');
+      const ctx = canvas.getContext('2d');
+      let W, H, pts = [];
+      function resize() {
+        const left = canvas.parentElement;
+        W = canvas.width  = left.offsetWidth;
+        H = canvas.height = left.offsetHeight;
+      }
+      function mkPt() {
+        return { x:Math.random()*W, y:Math.random()*H,
+          vx:(Math.random()-.5)*.4, vy:(Math.random()-.5)*.4,
+          r: 1.5+Math.random()*2 };
+      }
+      function init() { resize(); pts=[]; for(let i=0;i<55;i++) pts.push(mkPt()); }
+      function draw() {
+        ctx.clearRect(0,0,W,H);
+        pts.forEach(p => {
+          p.x+=p.vx; p.y+=p.vy;
+          if(p.x<0||p.x>W) p.vx*=-1;
+          if(p.y<0||p.y>H) p.vy*=-1;
+          ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+          ctx.fillStyle='rgba(47,128,237,.45)'; ctx.fill();
+        });
+        for(let i=0;i<pts.length;i++) {
+          for(let j=i+1;j<pts.length;j++) {
+            const dx=pts[i].x-pts[j].x, dy=pts[i].y-pts[j].y;
+            const d=Math.sqrt(dx*dx+dy*dy);
+            if(d<120) {
+              ctx.beginPath();
+              ctx.moveTo(pts[i].x,pts[i].y);
+              ctx.lineTo(pts[j].x,pts[j].y);
+              ctx.strokeStyle=`rgba(47,128,237,${.18*(1-d/120)})`;
+              ctx.lineWidth=.7; ctx.stroke();
+            }
+          }
+        }
+        requestAnimationFrame(draw);
+      }
+      init(); draw();
+      window.addEventListener('resize', init);
+    })();
+
+    // Animate stat counter — CPGRAMS 2024: 29.23 lakh received
+    (function(){
+      const el = document.getElementById('sn1');
+      let v=0; const target=2923000, step=Math.ceil(target/60);
+      const iv=setInterval(()=>{
+        v=Math.min(v+step*8, target);
+        el.textContent=(v/100000).toFixed(2)+'L';
+        if(v>=target){el.textContent='29.23L';clearInterval(iv);}
+      },30);
+    })();
+  </script>
+</body>
+</html>

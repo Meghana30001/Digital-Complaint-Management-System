@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Track Complaint — DCMS</title>
+  <link rel="stylesheet" href="styles/main.css"/>
+  <link rel="stylesheet" href="styles/animations.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    .track-layout{max-width:760px;margin:0 auto;padding:110px 24px 80px;}
+    .search-box{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-l);padding:32px;margin-bottom:32px;}
+    .search-row{display:flex;gap:12px;}
+    .search-input{flex:1;background:var(--bg-card2);border:1px solid var(--border);border-radius:10px;padding:13px 18px;font-size:1rem;font-family:var(--font-b);color:var(--text);outline:none;transition:border-color .2s;letter-spacing:.02em;}
+    .search-input:focus{border-color:var(--accent);}
+    .result-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-l);overflow:hidden;animation:fadeIn .4s ease;}
+    .result-header{padding:24px 28px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;}
+    .result-body{padding:24px 28px;}
+    .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px;}
+    .info-item{background:var(--bg-card2);border-radius:10px;padding:14px 16px;}
+    .info-item-lbl{font-size:.72rem;color:var(--text-d);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px;}
+    .info-item-val{font-size:.9rem;font-weight:500;color:var(--text);}
+    .timeline{display:flex;flex-direction:column;gap:0;}
+    .tl-item{display:flex;gap:14px;padding:14px 0;border-bottom:1px solid rgba(30,43,66,.4);}
+    .tl-item:last-child{border-bottom:none;}
+    .tl-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0;margin-top:4px;}
+    .tl-dot-done{background:var(--green);}
+    .tl-dot-prog{background:var(--accent);box-shadow:0 0 0 3px rgba(47,128,237,.2);}
+    .tl-dot-open{background:var(--border-l);border:2px solid var(--border-l);}
+    .tl-title{font-size:.9rem;font-weight:500;color:var(--text);margin-bottom:2px;}
+    .tl-sub{font-size:.78rem;color:var(--text-d);}
+    .my-list{display:flex;flex-direction:column;gap:10px;margin-top:24px;}
+    .my-row{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:16px 20px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;transition:border-color .2s;}
+    .my-row:hover{border-color:var(--border-l);}
+    .my-row-id{font-family:var(--font-m);font-size:.75rem;color:var(--text-d);}
+    .my-row-title{font-size:.9rem;font-weight:500;}
+    .rating-stars{display:flex;gap:4px;margin-top:8px;}
+    .star{font-size:1.3rem;cursor:pointer;color:var(--border-l);transition:color .15s;}
+    .star.lit{color:var(--gold);}
+  </style>
+</head>
+<body>
+  <nav class="navbar" id="navbar">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-brand"><span class="brand-icon">⬡</span><span class="brand-text">DCMS</span></a>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="#" class="dcms-dash-link">My Dashboard</a></li>
+        <li><a href="file-complaint.html">File Complaint</a></li>
+        <li><a href="track.html" class="active">Track</a></li>
+        <li><a href="reports.html">Reports</a></li>
+      </ul>
+      <div class="nav-actions"></div>
+    </div>
+  </nav>
+
+  <div class="track-layout">
+    <div style="margin-bottom:10px;"><span class="section-tag">Real-Time Tracking</span></div>
+    <h1 class="page-title">Track Your Complaint</h1>
+    <p class="page-desc" style="margin-bottom:32px;">Enter your Complaint ID to check its status, remarks, and full timeline.</p>
+
+    <div class="search-box reveal">
+      <label class="form-label" style="font-size:.95rem;margin-bottom:12px;display:block;">Enter Complaint ID</label>
+      <div class="search-row">
+        <input type="text" class="search-input" id="trackInput" placeholder="e.g. CMP-4912" oninput="this.value=this.value.toUpperCase()" onkeydown="if(event.key==='Enter')doTrack()"/>
+        <button class="btn-primary" style="padding:0 28px;" onclick="doTrack()">Search →</button>
+      </div>
+      <p style="font-size:.78rem;color:var(--text-d);margin-top:10px;">Format: CMP-XXXX (prefix is optional)</p>
+    </div>
+
+    <div id="resultArea"></div>
+
+    <div id="myComplaints" style="margin-top:8px;"></div>
+  </div>
+
+  <script src="js/api.js"></script><script src="js/auth.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/main.js"></script>
+  <script>
+    requireAuth(); dcmsUpdateNav(); dcmsApplyUser();
+    dcmsSeedData();
+
+    const priMap   = {low:'🟢 Low', medium:'🟡 Medium', high:'🔴 High'};
+    const statusMap = {
+      'open':       {badge:'status-open',    label:'● Open',       dot:'tl-dot-open'},
+      'in-progress':{badge:'status-progress',label:'◐ In Progress',dot:'tl-dot-prog'},
+      'resolved':   {badge:'status-resolved',label:'✓ Resolved',   dot:'tl-dot-done'},
+      'escalated':  {badge:'status-open',    label:'⬆ Escalated',  dot:'tl-dot-open'},
+      'closed':     {badge:'status-resolved',label:'✕ Closed',     dot:'tl-dot-done'}
+    };
+
+    function doTrack() {
+      let val = document.getElementById('trackInput').value.trim();
+      if (!val) { showToast('Please enter a Complaint ID','warning'); return; }
+      if (!val.startsWith('CMP-')) val = 'CMP-' + val;
+      const c = dcmsGetComplaintById(val);
+      if (!c) {
+        document.getElementById('resultArea').innerHTML = `
+          <div class="alert alert-error reveal">
+            ⚠️ No complaint found with ID <strong>#${val}</strong>. Please check the ID and try again.
+          </div>`;
+        return;
+      }
+      renderResult(c);
+    }
+
+    function renderResult(c) {
+      const sm = statusMap[c.status] || statusMap['open'];
+      const timeline = buildTimeline(c);
+      const u = dcmsGetUser();
+      const canRate = c.status === 'resolved' && c.rating === null && u && c.citizenId === u.userId;
+      document.getElementById('resultArea').innerHTML = `
+        <div class="result-card reveal">
+          <div class="result-header">
+            <div>
+              <div style="font-family:var(--font-m);font-size:.78rem;color:var(--text-d);margin-bottom:4px;">#${c.id}</div>
+              <div style="font-family:var(--font-h);font-size:1.3rem;">${c.title}</div>
+              <div style="font-size:.85rem;color:var(--text-d);margin-top:4px;">${c.dept} &nbsp;·&nbsp; Filed ${c.date}</div>
+            </div>
+            <span class="status-badge ${sm.badge}" style="font-size:.85rem;padding:6px 14px;">${sm.label}</span>
+          </div>
+          <div class="result-body">
+            <div class="info-grid">
+              <div class="info-item"><div class="info-item-lbl">Category</div><div class="info-item-val">${c.category}</div></div>
+              <div class="info-item"><div class="info-item-lbl">Priority</div><div class="info-item-val">${priMap[c.priority]||c.priority}</div></div>
+              <div class="info-item"><div class="info-item-lbl">Filed By</div><div class="info-item-val">${c.citizenName}</div></div>
+              <div class="info-item"><div class="info-item-lbl">Location</div><div class="info-item-val">${c.location||'—'}</div></div>
+              ${c.resolvedDate ? `<div class="info-item"><div class="info-item-lbl">Resolved On</div><div class="info-item-val">${c.resolvedDate}</div></div>` : ''}
+              ${c.rating ? `<div class="info-item"><div class="info-item-lbl">Your Rating</div><div class="info-item-val">${'⭐'.repeat(c.rating)}</div></div>` : ''}
+            </div>
+            <div style="background:var(--bg-card2);border-radius:10px;padding:16px;margin-bottom:24px;">
+              <div style="font-size:.75rem;color:var(--text-d);margin-bottom:6px;text-transform:uppercase;letter-spacing:.07em;">Description</div>
+              <p style="font-size:.9rem;color:var(--text-m);margin:0;">${c.description}</p>
+            </div>
+            ${c.remarks ? `<div style="background:rgba(47,128,237,.06);border:1px solid rgba(47,128,237,.2);border-radius:10px;padding:16px;margin-bottom:24px;">
+              <div style="font-size:.75rem;color:var(--accent);margin-bottom:6px;text-transform:uppercase;letter-spacing:.07em;">Officer Remarks</div>
+              <p style="font-size:.9rem;color:var(--text);margin:0;">${c.remarks}</p>
+            </div>` : ''}
+            <div style="font-family:var(--font-h);font-size:1rem;margin-bottom:14px;">Complaint Timeline</div>
+            <div class="timeline">${timeline}</div>
+            ${canRate ? `<div style="margin-top:24px;padding:20px;background:var(--bg-card2);border-radius:12px;">
+              <div style="font-size:.9rem;font-weight:500;margin-bottom:10px;">Rate this resolution</div>
+              <div class="rating-stars" id="ratingStars">
+                ${[1,2,3,4,5].map(i=>`<span class="star" onclick="submitRating('${c.id}',${i})" onmouseover="highlightStars(${i})" onmouseout="resetStars()">★</span>`).join('')}
+              </div>
+              <p style="font-size:.78rem;color:var(--text-d);margin-top:8px;">Click a star to rate your experience</p>
+            </div>` : ''}
+          </div>
+        </div>`;
+      document.querySelectorAll('.reveal').forEach(el => el.classList.add('visible'));
+    }
+
+    function buildTimeline(c) {
+      const rows = [
+        {dot:'tl-dot-done', title:'Complaint Filed', sub:`${c.date} · ID #${c.id} generated`},
+      ];
+      if (c.status !== 'open') {
+        rows.push({dot:'tl-dot-done', title:'Assigned to Department', sub:`Routed to ${c.dept}`});
+      }
+      if (c.status === 'in-progress' || c.status === 'resolved') {
+        rows.push({dot: c.status==='resolved'?'tl-dot-done':'tl-dot-prog',
+          title:'Under Investigation', sub: c.remarks || 'Officer is reviewing the complaint'});
+      }
+      if (c.status === 'resolved') {
+        rows.push({dot:'tl-dot-done', title:'Resolved', sub:`Resolved on ${c.resolvedDate}${c.rating?' · Rated '+c.rating+'/5':''}`});
+      }
+      if (c.status === 'open') {
+        rows.push({dot:'tl-dot-open', title:'Awaiting Assignment', sub:'Complaint is queued for officer assignment'});
+      }
+      return rows.map(r => `<div class="tl-item">
+        <div class="tl-dot ${r.dot}"></div>
+        <div><div class="tl-title">${r.title}</div><div class="tl-sub">${r.sub}</div></div>
+      </div>`).join('');
+    }
+
+    function highlightStars(n) {
+      document.querySelectorAll('.star').forEach((s,i) => s.classList.toggle('lit', i<n));
+    }
+    function resetStars() {
+      document.querySelectorAll('.star').forEach(s => s.classList.remove('lit'));
+    }
+    function submitRating(id, stars) {
+      dcmsUpdateComplaint(id, {rating: stars});
+      showToast(`Thank you! You rated this ${stars}/5 ⭐`, 'success');
+      doTrack();
+    }
+
+    // Show logged-in user's complaints below
+    function renderMyComplaints() {
+      const u = dcmsGetUser();
+      if (!u || u.role !== 'citizen') return;
+      const list = dcmsGetMyComplaints();
+      if (!list.length) return;
+      const area = document.getElementById('myComplaints');
+      area.innerHTML = `<div style="font-family:var(--font-h);font-size:1.1rem;margin-bottom:14px;margin-top:8px;">My Complaints</div>
+        <div class="my-list">
+          ${list.map(c => {
+            const sm = statusMap[c.status] || statusMap['open'];
+            return `<div class="my-row reveal" onclick="quickLoad('${c.id}')">
+              <div>
+                <div class="my-row-id">#${c.id} · ${c.date}</div>
+                <div class="my-row-title">${c.title}</div>
+                <div style="font-size:.78rem;color:var(--text-d);">${c.dept}</div>
+              </div>
+              <span class="status-badge ${sm.badge}">${sm.label}</span>
+            </div>`;
+          }).join('')}
+        </div>`;
+      area.querySelectorAll('.reveal').forEach(el => el.classList.add('visible'));
+    }
+
+    function quickLoad(id) {
+      document.getElementById('trackInput').value = id;
+      const c = dcmsGetComplaintById(id);
+      if (c) renderResult(c);
+      window.scrollTo({top:0, behavior:'smooth'});
+    }
+
+    renderMyComplaints();
+  </script>
+</body>
+</html>

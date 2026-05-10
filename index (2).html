@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>DCMS — Digital Complaint Management System</title>
+  <link rel="stylesheet" href="styles/main.css" />
+  <link rel="stylesheet" href="styles/animations.css" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav class="navbar" id="navbar">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-brand">
+        <span class="brand-icon">⬡</span>
+        <span class="brand-text">DCMS</span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="index.html" class="active">Home</a></li>
+        <li><a href="dashboard.html">Dashboard</a></li>
+        <li><a href="file-complaint.html">File Complaint</a></li>
+        <li><a href="track.html">Track</a></li>
+        <li><a href="reports.html">Reports</a></li>
+      </ul>
+      <div class="nav-actions">
+        <a href="login.html" class="btn-ghost">Sign In</a>
+        <a href="register.html" class="btn-primary">Register</a>
+      </div>
+      <button class="hamburger" id="hamburger" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-bg">
+      <div class="grid-overlay"></div>
+      <div class="orb orb-1"></div>
+      <div class="orb orb-2"></div>
+    </div>
+    <div class="hero-content">
+      <div class="hero-badge">
+        <span class="dot"></span> DBMS Mini Project — 2024
+      </div>
+      <h1 class="hero-title">
+        Digital Complaint<br/>
+        <em>Management System</em>
+      </h1>
+      <p class="hero-desc">
+        A structured, database-driven platform for submitting, tracking, and resolving complaints — built for transparency, accountability, and efficiency.
+      </p>
+      <div class="hero-cta">
+        <a href="file-complaint.html" class="btn-primary btn-lg">File a Complaint</a>
+        <a href="track.html" class="btn-outline btn-lg">Track Status</a>
+      </div>
+      <div class="hero-stats">
+        <div class="stat">
+          <span class="stat-num" data-target="1240">0</span>
+          <span class="stat-label">Complaints Filed</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat">
+          <span class="stat-num" data-target="98">0</span><span class="stat-suffix">%</span>
+          <span class="stat-label">Resolution Rate</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat">
+          <span class="stat-num" data-target="48">0</span><span class="stat-suffix">h</span>
+          <span class="stat-label">Avg. Response Time</span>
+        </div>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="card-stack">
+        <div class="float-card fc-1">
+          <span class="fc-tag resolved">✓ Resolved</span>
+          <p class="fc-id">#CMP-4821</p>
+          <p class="fc-title">Infrastructure Issue</p>
+        </div>
+        <div class="float-card fc-2">
+          <span class="fc-tag pending">● In Progress</span>
+          <p class="fc-id">#CMP-4899</p>
+          <p class="fc-title">Billing Discrepancy</p>
+        </div>
+        <div class="float-card fc-3">
+          <span class="fc-tag new">New</span>
+          <p class="fc-id">#CMP-4912</p>
+          <p class="fc-title">Service Unavailable</p>
+        </div>
+      </div>
+    </div>
+    <div class="scroll-hint">Scroll to explore ↓</div>
+  </section>
+
+  <!-- FEATURES -->
+  <section class="features section" id="features">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Core Features</span>
+        <h2 class="section-title">Everything you need,<br/> nothing you don't</h2>
+      </div>
+      <div class="features-grid">
+
+        <div class="feature-card fc-large">
+          <div class="feature-icon">🗄️</div>
+          <h3>Relational Database Core</h3>
+          <p>Built on a fully normalized RDBMS schema with foreign key constraints, indexing, and optimized SQL queries — showcasing real DBMS concepts like joins, triggers, and stored procedures.</p>
+          <ul class="feature-list">
+            <li>Entity-Relationship modelling</li>
+            <li>3NF normalized tables</li>
+            <li>Cascading updates & deletes</li>
+          </ul>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">🔍</div>
+          <h3>Real-time Tracking</h3>
+          <p>Every complaint is assigned a unique ID and full audit trail. Citizens and officers see live status changes instantly.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">🔐</div>
+          <h3>Role-Based Access</h3>
+          <p>Three-tier access system — Citizen, Officer, and Admin — with SQL-level privilege management and session control.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">📊</div>
+          <h3>Analytics Dashboard</h3>
+          <p>Visual reports powered by aggregated SQL queries — complaint trends, category breakdowns, department performance metrics.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">🔔</div>
+          <h3>Automated Escalation</h3>
+          <p>Database triggers automatically escalate unresolved complaints beyond SLA thresholds and notify the chain of command.</p>
+        </div>
+
+        <div class="feature-card fc-large">
+          <div class="feature-icon">🏗️</div>
+          <h3>Smart Category Routing</h3>
+          <p>Intelligent complaint routing using predefined category-department mappings stored in lookup tables. Each complaint is automatically assigned to the most relevant handling officer based on department workload and expertise — reducing response time significantly.</p>
+          <div class="feature-badge-row">
+            <span class="badge">Auto-routing</span>
+            <span class="badge">Load balancing</span>
+            <span class="badge">Priority queuing</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="how-it-works section">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Process</span>
+        <h2 class="section-title">From complaint to resolution</h2>
+      </div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">01</div>
+          <div class="step-body">
+            <h3>Register & Submit</h3>
+            <p>Citizens create a verified account and file a complaint with category, description, location, and supporting documents.</p>
+          </div>
+        </div>
+        <div class="step-arrow">→</div>
+        <div class="step">
+          <div class="step-num">02</div>
+          <div class="step-body">
+            <h3>Auto-Assigned</h3>
+            <p>The system routes the complaint to the appropriate department officer based on category rules stored in the database.</p>
+          </div>
+        </div>
+        <div class="step-arrow">→</div>
+        <div class="step">
+          <div class="step-num">03</div>
+          <div class="step-body">
+            <h3>Investigation</h3>
+            <p>Officers update status, add remarks, and escalate if necessary. All actions are logged in the activity table.</p>
+          </div>
+        </div>
+        <div class="step-arrow">→</div>
+        <div class="step">
+          <div class="step-num">04</div>
+          <div class="step-body">
+            <h3>Resolution & Feedback</h3>
+            <p>Citizens receive notification on resolution and submit a satisfaction rating, feeding back into officer performance data.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DB SCHEMA HIGHLIGHT -->
+  <section class="schema-section section">
+    <div class="container">
+      <div class="schema-inner">
+        <div class="schema-text">
+          <span class="section-tag">Database Design</span>
+          <h2>Engineered on solid DBMS foundations</h2>
+          <p>The system's backbone is a carefully designed relational schema with 8 primary tables, interconnected through referential integrity. Every operation — from filing to resolution — is a structured transaction.</p>
+          <ul class="schema-highlights">
+            <li><span class="mono">users</span> — Citizen & officer profiles with role flags</li>
+            <li><span class="mono">complaints</span> — Core complaint records with FK to user & category</li>
+            <li><span class="mono">categories</span> — Department routing lookup table</li>
+            <li><span class="mono">assignments</span> — Officer-complaint mapping with timestamps</li>
+            <li><span class="mono">status_log</span> — Full audit trail of every state change</li>
+            <li><span class="mono">feedback</span> — Post-resolution satisfaction records</li>
+          </ul>
+          <a href="reports.html" class="btn-primary mt-1">View Schema Diagram →</a>
+        </div>
+        <div class="schema-diagram">
+          <div class="db-table">
+            <div class="db-header">complaints</div>
+            <div class="db-row pk">🔑 complaint_id (PK)</div>
+            <div class="db-row fk">🔗 user_id (FK)</div>
+            <div class="db-row fk">🔗 category_id (FK)</div>
+            <div class="db-row">title</div>
+            <div class="db-row">description</div>
+            <div class="db-row">status</div>
+            <div class="db-row">priority</div>
+            <div class="db-row">created_at</div>
+          </div>
+          <div class="db-connector"></div>
+          <div class="db-mini-tables">
+            <div class="db-table sm">
+              <div class="db-header">users</div>
+              <div class="db-row pk">🔑 user_id</div>
+              <div class="db-row">name, email</div>
+              <div class="db-row">role, dept_id</div>
+            </div>
+            <div class="db-table sm">
+              <div class="db-header">status_log</div>
+              <div class="db-row pk">🔑 log_id</div>
+              <div class="db-row fk">🔗 complaint_id</div>
+              <div class="db-row">old_status → new</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TESTIMONIAL / QUOTE -->
+  <section class="quote-section">
+    <div class="container">
+      <blockquote>
+        "Transparency is the foundation of trust. DCMS ensures every grievance is heard, tracked, and resolved — with data integrity at every step."
+      </blockquote>
+      <cite>— Digital Governance Initiative</cite>
+    </div>
+  </section>
+
+  <!-- CTA BANNER -->
+  <section class="cta-section section">
+    <div class="container">
+      <div class="cta-box">
+        <h2>Ready to file or track a complaint?</h2>
+        <p>Join thousands of citizens using DCMS for transparent, accountable grievance redressal.</p>
+        <div class="cta-btns">
+          <a href="register.html" class="btn-primary btn-lg">Get Started — It's Free</a>
+          <a href="dashboard.html" class="btn-ghost btn-lg">View Live Dashboard</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="brand-mark">⬡ DCMS</div>
+          <p>A database-driven complaint management system for efficient, transparent, and accountable grievance resolution.</p>
+          <p class="footer-sub">DBMS Mini Project · 2024</p>
+        </div>
+        <div class="footer-col">
+          <h4>Platform</h4>
+          <ul>
+            <li><a href="file-complaint.html">File Complaint</a></li>
+            <li><a href="track.html">Track Status</a></li>
+            <li><a href="dashboard.html">Dashboard</a></li>
+            <li><a href="reports.html">Reports</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Account</h4>
+          <ul>
+            <li><a href="register.html">Register</a></li>
+            <li><a href="login.html">Sign In</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Project</h4>
+          <ul>
+            <li><a href="reports.html">ER Diagram</a></li>
+            <li><a href="reports.html">Schema</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2024 DCMS — Digital Complaint Management System</span>
+        <span>Built with SQL · Relational Integrity · Transparency</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+</body>
+</html>

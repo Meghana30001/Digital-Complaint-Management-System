@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>File a Complaint — DCMS</title>
+  <link rel="stylesheet" href="styles/main.css"/>
+  <link rel="stylesheet" href="styles/animations.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    .file-layout { max-width: 800px; margin: 0 auto; padding: 120px 24px 80px; }
+    .steps-indicator {
+      display: flex; align-items: center; gap: 0; margin-bottom: 48px;
+    }
+    .step-ind {
+      display: flex; align-items: center; gap: 10px; flex: 1;
+    }
+    .step-circle {
+      width: 36px; height: 36px; border-radius: 50%;
+      border: 2px solid var(--border-l);
+      display: flex; align-items: center; justify-content: center;
+      font-size: .82rem; font-weight: 600; color: var(--text-d);
+      transition: all .3s; flex-shrink: 0;
+      font-family: var(--font-m);
+    }
+    .step-circle.active { border-color: var(--accent); background: var(--accent); color: #fff; }
+    .step-circle.done { border-color: var(--green); background: rgba(52,211,153,.15); color: var(--green); }
+    .step-ind-label { font-size: .82rem; color: var(--text-d); white-space: nowrap; }
+    .step-ind.active .step-ind-label { color: var(--text); font-weight: 500; }
+    .step-line { flex: 1; height: 1px; background: var(--border-l); margin: 0 8px; }
+
+    .form-step { display: none; animation: fadeIn .4s ease; }
+    .form-step.active { display: block; }
+
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .form-title { font-family: var(--font-h); font-size: 1.6rem; margin-bottom: 6px; }
+    .form-subtitle { color: var(--text-m); margin-bottom: 28px; }
+
+    .priority-options { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; }
+    .priority-option { position: relative; }
+    .priority-option input { position: absolute; opacity: 0; }
+    .priority-label {
+      display: block; text-align: center; padding: 14px;
+      border: 1.5px solid var(--border); border-radius: 10px;
+      cursor: pointer; transition: all .2s; font-size: .9rem; font-weight: 500;
+    }
+    .priority-option input:checked + .priority-label {
+      border-color: var(--accent); background: rgba(47,128,237,.1); color: var(--accent);
+    }
+    .priority-label:hover { border-color: var(--border-l); }
+
+    .file-drop {
+      border: 2px dashed var(--border-l); border-radius: 12px;
+      padding: 36px; text-align: center; cursor: pointer;
+      transition: border-color .2s, background .2s;
+    }
+    .file-drop:hover, .file-drop.drag-over {
+      border-color: var(--accent); background: rgba(47,128,237,.04);
+    }
+    .file-drop-icon { font-size: 2rem; margin-bottom: 10px; }
+    .file-drop p { color: var(--text-m); font-size: .9rem; }
+    .file-drop span { color: var(--accent); font-weight: 500; }
+
+    .form-nav { display: flex; justify-content: space-between; align-items: center; margin-top: 32px; }
+
+    .success-state {
+      text-align: center; padding: 60px 32px; display: none;
+      animation: scaleIn .5s ease;
+    }
+    .success-state.active { display: block; }
+    .success-icon { font-size: 4rem; margin-bottom: 20px; }
+    .success-state h2 { font-family: var(--font-h); font-size: 2rem; margin-bottom: 10px; }
+    .success-state p { color: var(--text-m); max-width: 400px; margin: 0 auto 24px; }
+    .complaint-id-box {
+      background: var(--bg-card2); border: 1px solid var(--border);
+      border-radius: 10px; padding: 16px 24px; display: inline-block;
+      font-family: var(--font-m); font-size: 1.1rem; color: var(--accent);
+      margin-bottom: 28px;
+    }
+
+    .info-card {
+      background: var(--bg-card2); border: 1px solid var(--border);
+      border-radius: 12px; padding: 20px 24px; margin-bottom: 16px;
+    }
+    .info-card h4 { font-size: .9rem; font-weight: 600; margin-bottom: 6px; }
+    .info-card p  { font-size: .84rem; color: var(--text-m); }
+  </style>
+</head>
+<body>
+  <nav class="navbar" id="navbar">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-brand"><span class="brand-icon">⬡</span><span class="brand-text">DCMS</span></a>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="citizen-dashboard.html" class="dcms-dash-link">My Dashboard</a></li>
+        <li><a href="file-complaint.html" class="active">File Complaint</a></li>
+        <li><a href="track.html">Track</a></li>
+      </ul>
+      <div class="nav-actions">
+        <a href="login.html" class="btn-ghost">Sign In</a>
+        <a href="register.html" class="btn-primary">Register</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="file-layout">
+    <div style="margin-bottom:12px;"><span class="section-tag">Grievance Portal</span></div>
+    <h1 class="page-title">File a New Complaint</h1>
+    <p class="page-desc" style="margin-bottom:40px;">Submit your complaint and we'll route it to the right department automatically.</p>
+
+    <!-- STEP INDICATOR -->
+    <div class="steps-indicator">
+      <div class="step-ind active" id="ind-1">
+        <div class="step-circle active" id="sc-1">1</div>
+        <div class="step-ind-label">Details</div>
+      </div>
+      <div class="step-line"></div>
+      <div class="step-ind" id="ind-2">
+        <div class="step-circle" id="sc-2">2</div>
+        <div class="step-ind-label">Classification</div>
+      </div>
+      <div class="step-line"></div>
+      <div class="step-ind" id="ind-3">
+        <div class="step-circle" id="sc-3">3</div>
+        <div class="step-ind-label">Evidence</div>
+      </div>
+      <div class="step-line"></div>
+      <div class="step-ind" id="ind-4">
+        <div class="step-circle" id="sc-4">4</div>
+        <div class="step-ind-label">Review</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <!-- STEP 1 -->
+      <div class="form-step active" id="step-1">
+        <h2 class="form-title">Complaint Details</h2>
+        <p class="form-subtitle">Provide a clear and concise description of your grievance.</p>
+        <div class="form-row" style="margin-bottom:20px;">
+          <div class="form-group" style="margin:0;">
+            <label class="form-label">Full Name *</label>
+            <input type="text" class="form-input" id="cName" placeholder="Your full name" />
+          </div>
+          <div class="form-group" style="margin:0;">
+            <label class="form-label">Email Address *</label>
+            <input type="email" class="form-input" id="cEmail" placeholder="you@example.com" />
+          </div>
+        </div>
+        <div class="form-row" style="margin-bottom:20px;">
+          <div class="form-group" style="margin:0;">
+            <label class="form-label">Phone Number</label>
+            <input type="tel" class="form-input" placeholder="+91 XXXXX XXXXX" />
+          </div>
+          <div class="form-group" style="margin:0;">
+            <label class="form-label">Location / Address *</label>
+            <input type="text" class="form-input" id="cLocation" placeholder="Area or address of incident" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Complaint Title *</label>
+          <input type="text" class="form-input" id="cTitle" placeholder="Brief title summarizing the issue" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Detailed Description *</label>
+          <textarea class="form-textarea" id="cDesc" style="min-height:150px;" placeholder="Describe the issue in detail — what happened, when, and how it has affected you..."></textarea>
+        </div>
+        <div class="form-nav">
+          <span style="font-size:.85rem;color:var(--text-d);">Step 1 of 4</span>
+          <button class="btn-primary" onclick="nextStep(1)">Continue →</button>
+        </div>
+      </div>
+
+      <!-- STEP 2 -->
+      <div class="form-step" id="step-2">
+        <h2 class="form-title">Classification</h2>
+        <p class="form-subtitle">Help us route your complaint to the right department.</p>
+        <div class="form-row" style="margin-bottom:20px;">
+          <div class="form-group" style="margin:0;">
+            <label class="form-label">Category *</label>
+            <select class="form-select" id="cCategory">
+              <option value="">Select category</option>
+              <option>Infrastructure</option>
+              <option>Billing & Payments</option>
+              <option>Roads & Transport</option>
+              <option>Utilities (Water/Power)</option>
+              <option>Sanitation</option>
+              <option>Health Services</option>
+              <option>Education</option>
+              <option>Security / Safety</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin:0;">
+            <label class="form-label">Sub-Category</label>
+            <select class="form-select">
+              <option value="">Select sub-category</option>
+              <option>Maintenance</option>
+              <option>Construction</option>
+              <option>Service Failure</option>
+              <option>Corruption/Misconduct</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Priority Level *</label>
+          <div class="priority-options">
+            <div class="priority-option">
+              <input type="radio" name="priority" id="p-low" value="low"/>
+              <label class="priority-label" for="p-low">🟢 Low<br/><small style="font-weight:400;color:var(--text-d)">Not urgent</small></label>
+            </div>
+            <div class="priority-option">
+              <input type="radio" name="priority" id="p-med" value="medium" checked/>
+              <label class="priority-label" for="p-med">🟡 Medium<br/><small style="font-weight:400;color:var(--text-d)">Needs attention</small></label>
+            </div>
+            <div class="priority-option">
+              <input type="radio" name="priority" id="p-high" value="high"/>
+              <label class="priority-label" for="p-high">🔴 High<br/><small style="font-weight:400;color:var(--text-d)">Urgent</small></label>
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Date of Incident</label>
+          <input type="date" class="form-input"/>
+        </div>
+        <div class="form-nav">
+          <button class="btn-ghost" onclick="prevStep(2)">← Back</button>
+          <button class="btn-primary" onclick="nextStep(2)">Continue →</button>
+        </div>
+      </div>
+
+      <!-- STEP 3 -->
+      <div class="form-step" id="step-3">
+        <h2 class="form-title">Supporting Evidence</h2>
+        <p class="form-subtitle">Attach photos, documents, or any evidence relevant to your complaint.</p>
+        <div class="file-drop" id="fileDrop">
+          <div class="file-drop-icon">📎</div>
+          <p><span>Click to upload</span> or drag and drop files here</p>
+          <p style="margin-top:6px;font-size:.8rem;">PNG, JPG, PDF — max 10MB each</p>
+          <input type="file" id="fileInput" multiple style="display:none;" accept=".png,.jpg,.jpeg,.pdf"/>
+        </div>
+        <div id="fileList" style="margin-top:14px;display:flex;flex-direction:column;gap:8px;"></div>
+        <div class="form-group" style="margin-top:20px;">
+          <label class="form-label">Additional Reference (optional)</label>
+          <input type="text" class="form-input" placeholder="Any case number, order ID, or reference code" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Preferred Contact Method</label>
+          <select class="form-select">
+            <option>Email</option>
+            <option>Phone</option>
+            <option>Portal Notifications</option>
+          </select>
+        </div>
+        <div class="form-nav">
+          <button class="btn-ghost" onclick="prevStep(3)">← Back</button>
+          <button class="btn-primary" onclick="nextStep(3)">Review →</button>
+        </div>
+      </div>
+
+            <!-- STEP 4 -->
+      <div class="form-step" id="step-4">
+        <h2 class="form-title">Review &amp; Submit</h2>
+        <p class="form-subtitle">Verify all details before submitting. A unique Complaint ID will be generated instantly.</p>
+        <div class="info-card">
+          <h4>Complainant</h4>
+          <p id="reviewUser" style="color:var(--text-m);">—</p>
+        </div>
+        <div class="info-card">
+          <h4>Complaint Details</h4>
+          <p id="reviewDetails" style="color:var(--text-m);">—</p>
+        </div>
+        <div class="info-card">
+          <h4>Description</h4>
+          <p id="reviewDesc" style="color:var(--text-m);">—</p>
+        </div>
+        <div class="alert alert-info" style="margin-bottom:24px;">
+          ℹ️ By submitting, you confirm all information provided is accurate.
+        </div>
+        <div class="form-nav">
+          <button class="btn-ghost" onclick="prevStep(4)">← Back</button>
+          <button class="btn-primary btn-lg" id="submitBtn" onclick="submitComplaint()">Submit Complaint ✓</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUCCESS -->
+    <div class="success-state card" id="successState">
+      <div class="success-icon">🎉</div>
+      <h2>Complaint Filed Successfully!</h2>
+      <p>Your complaint has been recorded and routed to the relevant department. You'll receive updates at every stage.</p>
+      <div class="complaint-id-box" id="successCmpId">Complaint ID: #CMP-????</div>
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:8px;">
+        <a href="track.html" class="btn-primary">Track Your Complaint</a>
+        <a href="citizen-dashboard.html" class="btn-ghost">My Dashboard</a>
+      </div>
+    </div>
+  </div>
+<div class="success-state card" id="successState">
+      <div class="success-icon">🎉</div>
+      <h2>Complaint Filed Successfully!</h2>
+      <p>Your complaint has been recorded and assigned to the relevant department. You'll receive updates at your registered email.</p>
+      <div class="complaint-id-box" id="successCmpId_old">Complaint ID: #CMP-????</div>
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+        <a href="track.html" class="btn-primary">Track Your Complaint</a>
+        <a href="citizen-dashboard.html" class="btn-ghost">My Dashboard</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script><script src="js/auth.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/main.js"></script>
+  <script>
+    let currentStep = 1;
+
+    function nextStep(from) {
+      // Validate per step — check only fields on THAT step
+      if (from === 1) {
+        const title = document.getElementById('cTitle').value.trim();
+        const desc  = document.getElementById('cDesc').value.trim();
+        if (!title) { showToast('Please enter a complaint title.','error'); return; }
+        if (desc.length < 20) { showToast('Please describe the issue (min 20 characters).','error'); return; }
+      }
+      if (from === 2) {
+        const cat = document.getElementById('cCategory').value;
+        if (!cat) { showToast('Please select a category.','error'); return; }
+      }
+      if (from === 3) { populateReview(); }
+      goTo(from + 1);
+    }
+    function prevStep(from) { goTo(from - 1); }
+    function goTo(n) {
+      document.getElementById(`step-${currentStep}`).classList.remove('active');
+      updateIndicator(currentStep, 'done');
+      currentStep = n;
+      document.getElementById(`step-${currentStep}`).classList.add('active');
+      updateIndicator(currentStep, 'active');
+      window.scrollTo({top:0,behavior:'smooth'});
+    }
+    function updateIndicator(n, state) {
+      const sc = document.getElementById(`sc-${n}`);
+      const ind = document.getElementById(`ind-${n}`);
+      if (!sc || !ind) return;
+      sc.className = `step-circle ${state}`;
+      if (state === 'done') sc.textContent = '✓';
+      ind.className = `step-ind ${state === 'active' ? 'active' : ''}`;
+    }
+
+    function populateReview() {
+      const u = dcmsGetUser();
+      const title    = document.getElementById('cTitle').value;
+      const cat      = document.getElementById('cCategory').value;
+      const priority = document.querySelector('input[name="priority"]:checked')?.value || 'medium';
+      const desc     = document.getElementById('cDesc').value;
+      const location = document.getElementById('cLocation')?.value || '';
+      const today    = new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
+      const priMap   = {low:'🟢 Low',medium:'🟡 Medium',high:'🔴 High'};
+      if (u) document.getElementById('reviewUser').textContent =
+        `${u.name}  ·  ${u.email}  ·  ${u.phone}`;
+      document.getElementById('reviewDetails').innerHTML =
+        `<strong>Title:</strong> ${title}<br/><strong>Category:</strong> ${cat}<br/>` +
+        `<strong>Priority:</strong> ${priMap[priority]||priority}  ·  <strong>Date:</strong> ${today}` +
+        (location ? `<br/><strong>Location:</strong> ${location}` : '');
+      document.getElementById('reviewDesc').textContent = desc;
+    }
+
+    function submitComplaint() {
+      const title    = document.getElementById('cTitle').value.trim();
+      const cat      = document.getElementById('cCategory').value;
+      const priority = document.querySelector('input[name="priority"]:checked')?.value || 'medium';
+      const desc     = document.getElementById('cDesc').value.trim();
+      const location = document.getElementById('cLocation')?.value || '';
+      const btn = document.getElementById('submitBtn');
+      btn.disabled = true; btn.textContent = '⏳ Submitting...';
+      showLoading('Filing your complaint…');
+      setTimeout(() => {
+        const complaint = dcmsAddComplaint({ title, category:cat, dept: DEPT_MAP[cat]||'General Admin', description:desc, priority, location });
+        hideLoading();
+        document.querySelector('.form-step.active').style.display = 'none';
+        document.getElementById('successCmpId').textContent = 'Complaint ID: #' + complaint.id;
+        const ss = document.getElementById('successState');
+        ss.classList.add('active');
+        ss.style.animation = 'fadeIn .5s ease';
+        showToast('Complaint filed! ID: #' + complaint.id, 'success');
+      }, 1500);
+    }
+
+    // File drop
+    const drop = document.getElementById('fileDrop');
+    const fi   = document.getElementById('fileInput');
+    const fl   = document.getElementById('fileList');
+    drop.addEventListener('click', () => fi.click());
+    drop.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('drag-over'); });
+    drop.addEventListener('dragleave', () => drop.classList.remove('drag-over'));
+    drop.addEventListener('drop', e => { e.preventDefault(); drop.classList.remove('drag-over'); handleFiles(e.dataTransfer.files); });
+    fi.addEventListener('change', () => handleFiles(fi.files));
+    function handleFiles(files) {
+      [...files].forEach(f => {
+        const div = document.createElement('div');
+        div.style.cssText = 'display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--bg-card2);border:1px solid var(--border);border-radius:8px;font-size:.85rem;';
+        div.innerHTML = `<span>📄</span><span style="flex:1;color:var(--text);">${f.name}</span><span style="color:var(--text-d);">${(f.size/1024).toFixed(1)} KB</span>`;
+        fl.appendChild(div);
+      });
+    }
+  </script>
+  <script>
+  requireAuth(); dcmsUpdateNav();
+  const _u = dcmsGetUser();
+  if (_u) {
+    const n = document.getElementById('cName');
+    const e = document.getElementById('cEmail');
+    if (n) n.value = _u.name;
+    if (e) e.value = _u.email;
+  }
+</script>
+</body>
+</html>
