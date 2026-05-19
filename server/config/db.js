@@ -1,9 +1,24 @@
+const dns = require('dns');
 const mongoose = require('mongoose');
 
+// Some networks block or fail SRV lookups for mongodb+srv; public DNS fixes that.
+dns.setServers(['8.8.8.8', '1.1.1.1', '8.8.4.4']);
+
 const connectDB = async () => {
+  const uri = process.env.MONGO_URI;
+  if (!uri) {
+    console.error('\n❌ MONGO_URI is not set in server/.env\n');
+    return false;
+  }
+  if (/<[^>]+>/.test(uri)) {
+    console.error('\n❌ MONGO_URI contains <angle brackets> — remove them from username/password.');
+    console.error('   Atlas shows placeholders like <password>; use your real password only.\n');
+    return false;
+  }
+
   try {
-    const conn = await mongoose.connect(process.env.MONGO_URI, {
-      serverSelectionTimeoutMS: 5000
+    const conn = await mongoose.connect(uri, {
+      serverSelectionTimeoutMS: 15000
     });
     console.log(`✅ MongoDB connected: ${conn.connection.host}`);
     return true;

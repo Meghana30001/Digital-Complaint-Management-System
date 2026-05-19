@@ -352,21 +352,19 @@
   <script src="js/data.js"></script>
   <script src="js/main.js"></script>
   <script>
-    // Temporarily bypass auth for testing
-    console.log('Admin dashboard loading...');
-    // requireAuth(); 
-    dcmsUpdateNav(); dcmsApplyUser();
-    dcmsSeedData();
+    async function initAdminDashboard() {
+      if (!await dcmsRequirePage('admin')) return;
+      dcmsSeedData();
 
-    // ── Live stats from localStorage ──
-    const allC   = dcmsGetComplaints();
-    const stats  = dcmsGetStats();
+      const allC  = await dcmsGetComplaints();
+      const stats = await dcmsGetStats();
+      const pending = (stats.open || 0) + (stats.inProgress || 0);
 
     // Patch KPI values
     const kpiVals = document.querySelectorAll('.kpi-val');
     if (kpiVals[0]) { kpiVals[0].textContent = stats.total;    kpiVals[0].dataset.target = stats.total; }
     if (kpiVals[1]) { kpiVals[1].textContent = stats.resolved; kpiVals[1].dataset.target = stats.resolved; }
-    if (kpiVals[2]) { kpiVals[2].textContent = stats.open + stats.progress; kpiVals[2].dataset.target = stats.open + stats.progress; }
+    if (kpiVals[2]) { kpiVals[2].textContent = pending; kpiVals[2].dataset.target = pending; }
     if (kpiVals[3]) { const rate = stats.total ? Math.round(stats.resolved/stats.total*100) : 0; kpiVals[3].textContent = rate + '%'; }
 
     // ── Build bar chart from real monthly data ──
@@ -429,10 +427,22 @@
           <td><span style="font-size:.78rem;">${pr.label}</span></td>
           <td><span class="status-badge ${sm.badge}" style="font-size:.76rem;">${sm.label}</span></td>
           <td style="font-size:.8rem;color:var(--text-d);">${c.date}</td>
-          <td><button class="btn-outline" style="padding:4px 10px;font-size:.78rem;" onclick="window.location.href='track.html'">View</button></td>
+          <td>
+            <button class="btn-outline" style="padding:4px 10px;font-size:.78rem;" onclick="window.location.href='track.html?id=${c.id}'">View</button>
+            <button class="btn-outline" style="padding:4px 10px;font-size:.78rem;margin-left:4px;color:var(--red);" onclick="adminDeleteCmp('${c.id}')">Del</button>
+          </td>
         </tr>`;
       }).join('');
     }
+
+    window.adminDeleteCmp = async (id) => {
+      if (!confirm('Delete complaint #' + id + '?')) return;
+      try {
+        await dcmsDeleteComplaint(id);
+        showToast('Complaint deleted', 'success');
+        initAdminDashboard();
+      } catch (e) { showToast(e.message, 'error'); }
+    };
 
     // ── Activity feed from real data ──
     const actEl = document.getElementById('activityFeed');
@@ -476,6 +486,8 @@
         });
       },400);
     }
+    }
+    initAdminDashboard();
   </script>
 </body>
 </html>

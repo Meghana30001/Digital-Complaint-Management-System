@@ -77,8 +77,16 @@
   <script src="js/data.js"></script>
   <script src="js/main.js"></script>
   <script>
-    requireAuth(); dcmsUpdateNav(); dcmsApplyUser();
-    dcmsSeedData();
+    (async () => {
+      if (!await dcmsRequirePage()) return;
+      dcmsSeedData();
+      const params = new URLSearchParams(location.search);
+      if (params.get('id')) {
+        document.getElementById('trackInput').value = params.get('id');
+        await doTrack();
+      }
+      await renderMyComplaints();
+    })();
 
     const priMap   = {low:'🟢 Low', medium:'🟡 Medium', high:'🔴 High'};
     const statusMap = {
@@ -89,11 +97,20 @@
       'closed':     {badge:'status-resolved',label:'✕ Closed',     dot:'tl-dot-done'}
     };
 
-    function doTrack() {
+    async function doTrack() {
       let val = document.getElementById('trackInput').value.trim();
       if (!val) { showToast('Please enter a Complaint ID','warning'); return; }
       if (!val.startsWith('CMP-')) val = 'CMP-' + val;
-      const c = dcmsGetComplaintById(val);
+      let c = null;
+      try {
+        c = dcmsApi.hasToken()
+          ? await dcmsGetComplaintById(val)
+          : await dcmsTrackComplaint(val);
+        if (!c) c = await dcmsTrackComplaint(val);
+      } catch (e) {
+        showToast(e.message || 'Could not load complaint', 'error');
+        return;
+      }
       if (!c) {
         document.getElementById('resultArea').innerHTML = `
           <div class="alert alert-error reveal">
@@ -108,7 +125,8 @@
       const sm = statusMap[c.status] || statusMap['open'];
       const timeline = buildTimeline(c);
       const u = dcmsGetUser();
-      const canRate = c.status === 'resolved' && c.rating === null && u && c.citizenId === u.userId;
+      const canRate = c.status === 'resolved' && !c.rating && u && u.role === 'citizen' &&
+        (c.citizenId === u.id || c.citizenId === u.userId);
       document.getElementById('resultArea').innerHTML = `
         <div class="result-card reveal">
           <div class="result-header">
@@ -179,17 +197,20 @@
     function resetStars() {
       document.querySelectorAll('.star').forEach(s => s.classList.remove('lit'));
     }
-    function submitRating(id, stars) {
-      dcmsUpdateComplaint(id, {rating: stars});
-      showToast(`Thank you! You rated this ${stars}/5 ⭐`, 'success');
-      doTrack();
+    async function submitRating(id, stars) {
+      try {
+        await dcmsUpdateComplaint(id, { rating: stars });
+        showToast(`Thank you! You rated this ${stars}/5 ⭐`, 'success');
+        await doTrack();
+      } catch (e) {
+        showToast(e.message || 'Could not save rating', 'error');
+      }
     }
 
-    // Show logged-in user's complaints below
-    function renderMyComplaints() {
+    async function renderMyComplaints() {
       const u = dcmsGetUser();
       if (!u || u.role !== 'citizen') return;
-      const list = dcmsGetMyComplaints();
+      const list = await dcmsGetMyComplaints();
       if (!list.length) return;
       const area = document.getElementById('myComplaints');
       area.innerHTML = `<div style="font-family:var(--font-h);font-size:1.1rem;margin-bottom:14px;margin-top:8px;">My Complaints</div>
@@ -209,14 +230,12 @@
       area.querySelectorAll('.reveal').forEach(el => el.classList.add('visible'));
     }
 
-    function quickLoad(id) {
+    async function quickLoad(id) {
       document.getElementById('trackInput').value = id;
-      const c = dcmsGetComplaintById(id);
+      const c = await dcmsGetComplaintById(id);
       if (c) renderResult(c);
       window.scrollTo({top:0, behavior:'smooth'});
     }
-
-    renderMyComplaints();
   </script>
 </body>
 </html>

@@ -136,9 +136,11 @@ exports.updateComplaint = async (req, res) => {
       return res.status(403).json({ success: false, message: 'Citizens can only rate resolved complaints.' });
     }
 
-    // Officers/Admin can update status, remarks, officerId
-    const allowed = ['status', 'remarks', 'officerId', 'priority'];
+    // Officers/Admin can update status, remarks, priority
+    const allowed = ['status', 'remarks', 'priority'];
     allowed.forEach(k => { if (req.body[k] !== undefined) complaint[k] = req.body[k]; });
+
+    if (role === 'officer') complaint.officerId = id;
 
     if (req.body.status === 'resolved' && !complaint.resolvedDate) {
       complaint.resolvedDate = new Date();
@@ -147,6 +149,58 @@ exports.updateComplaint = async (req, res) => {
     await complaint.save();
     res.json({ success: true, complaint });
   } catch (err) {
+    res.status(500).json({ success: false, message: 'Server error.' });
+  }
+};
+
+// ── GET /api/complaints/analytics ────────────────────────────
+exports.getAnalytics = async (req, res) => {
+  try {
+    let filter = {};
+    const { role, id, dept } = req.user;
+    if (role === 'citizen')      filter = { citizenId: id };
+    else if (role === 'officer') filter = { $or: [{ dept }, { officerId: id }] };
+
+    const [byDept, byCategory, byStatus] = await Promise.all([
+      Complaint.aggregate([
+        { $match: filter },
+        { $group: {
+          _id: '$dept',
+          total: { $sum: 1 },
+          open: { $sum: { $cond: [{ $eq: ['$status', 'open'] }, 1, 0] } },
+          inProgress: { $sum: { $cond: [{ $eq: ['$status', 'in-progress'] }, 1, 0] } },
+          resolved: { $sum: { $cond: [{ $eq: ['$status', 'resolved'] }, 1, 0] } }
+        }},
+        { $sort: { total: -1 } }
+      ]),
+      Complaint.aggregate([
+        { $match: filter },
+        { $group: { _id: '$category', total: { $sum: 1 } } },
+        { $sort: { total: -1 } }
+      ]),
+      Complaint.aggregate([
+        { $match: filter },
+        { $group: { _id: '$status', count: { $sum: 1 } } }
+      ])
+    ]);
+
+    res.json({
+      success: true,
+      analytics: {
+        byDept: byDept.map(d => ({
+          dept: d._id || 'Unknown',
+          total: d.total,
+          open: d.open,
+          inProgress: d.inProgress,
+          resolved: d.resolved,
+          pending: d.open + d.inProgress
+        })),
+        byCategory: byCategory.map(c => ({ category: c._id || 'Other', total: c.total })),
+        byStatus: Object.fromEntries(byStatus.map(s => [s._id, s.count]))
+      }
+    });
+  } catch (err) {
+    console.error('getAnalytics error:', err);
     res.status(500).json({ success: false, message: 'Server error.' });
   }
 };

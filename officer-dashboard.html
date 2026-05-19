@@ -115,9 +115,12 @@
   <script src="js/data.js"></script>
   <script src="js/main.js"></script>
   <script>
-    requireAuth();
-    dcmsUpdateNav();
-    dcmsSeedData();
+    (async () => {
+      if (!await dcmsRequirePage('officer')) return;
+      dcmsSeedData();
+      const data = await dcmsGetComplaints();
+      if (data) renderDash(data);
+    })();
 
     const u = dcmsGetUser();
 
@@ -258,23 +261,14 @@
       const remarks = document.getElementById('officerRemarks').value.trim();
       if (!remarks) { showToast && showToast('Please add officer remarks before saving.','warning'); return; }
       typeof showLoading === 'function' && showLoading('Saving update…');
-      await dcmsUpdateComplaint(id, { status, remarks, officerId: u ? u.userId : null });
+      await dcmsUpdateComplaint(id, { status, remarks });
       typeof hideLoading === 'function' && hideLoading();
       closeModal();
       showToast && showToast('Complaint #' + id + ' updated to ' + status, 'success');
-      // Refresh
-      const fresh = dcmsGetComplaintsSync();
-      renderDash(fresh);
-      dcmsGetComplaints().then(d => { if (d && d.length) renderDash(d); }).catch(()=>{});
+      const data = await dcmsGetComplaints();
+      if (data) renderDash(data);
     }
 
-    // Render immediately from localStorage, then update if backend responds
-    const syncData = dcmsGetComplaintsSync();
-    renderDash(syncData);
-
-    dcmsGetComplaints().then(data => {
-      if (data && data.length) renderDash(data);
-    }).catch(() => {});
   </script>
 </body>
 </html>

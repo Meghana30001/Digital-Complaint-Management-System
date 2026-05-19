@@ -129,7 +129,14 @@
   <script src="js/data.js"></script>
   <script src="js/main.js"></script>
   <script>
+  (async () => {
+    if (!await dcmsRequirePage()) return;
+    initProfile();
+  })();
+
+  async function initProfile() {
   const u = dcmsGetUser();
+  if (!u) return;
 
   // ── Apply basic fields ──
   dcmsApplyUser();
@@ -192,35 +199,26 @@
   </div>`;
   document.getElementById('sidebar').innerHTML = (sidebarCfg[u.role] || sidebarCfg.citizen) + accountSection;
 
-  // ── Stats per role ──
+  const stats = await dcmsGetStats();
   const statsCfg = {
-    citizen: {
-      title: 'My Complaint Stats',
-      stats: [
-        {val:'7', lbl:'Total Filed', c:'var(--accent)'},
-        {val:'5', lbl:'Resolved', c:'var(--green)'},
-        {val:'1', lbl:'In Progress', c:'var(--yellow)'},
-        {val:'1', lbl:'Open', c:'var(--red)'}
-      ]
-    },
-    officer: {
-      title: 'Officer Performance',
-      stats: [
-        {val:'4', lbl:'Currently Assigned', c:'var(--accent)'},
-        {val:'28', lbl:'Resolved This Month', c:'var(--green)'},
-        {val:'1', lbl:'SLA Breached', c:'var(--red)'},
-        {val:'4.7', lbl:'Avg. Citizen Rating', c:'var(--gold)'}
-      ]
-    },
-    admin: {
-      title: 'System Overview',
-      stats: [
-        {val:'1240', lbl:'Total Complaints', c:'var(--accent)'},
-        {val:'1153', lbl:'Resolved', c:'var(--green)'},
-        {val:'87', lbl:'Pending', c:'var(--yellow)'},
-        {val:'48h', lbl:'Avg. Resolution', c:'var(--gold)'}
-      ]
-    }
+    citizen: { title: 'My Complaint Stats', stats: [
+      {val: stats.total, lbl:'Total Filed', c:'var(--accent)'},
+      {val: stats.resolved, lbl:'Resolved', c:'var(--green)'},
+      {val: stats.inProgress, lbl:'In Progress', c:'var(--yellow)'},
+      {val: stats.open, lbl:'Open', c:'var(--red)'}
+    ]},
+    officer: { title: 'Officer Performance', stats: [
+      {val: stats.total, lbl:'Assigned Total', c:'var(--accent)'},
+      {val: stats.resolved, lbl:'Resolved', c:'var(--green)'},
+      {val: (stats.open||0)+(stats.inProgress||0), lbl:'Pending', c:'var(--yellow)'},
+      {val: stats.escalated, lbl:'Escalated', c:'var(--red)'}
+    ]},
+    admin: { title: 'System Overview', stats: [
+      {val: stats.total, lbl:'Total Complaints', c:'var(--accent)'},
+      {val: stats.resolved, lbl:'Resolved', c:'var(--green)'},
+      {val: (stats.open||0)+(stats.inProgress||0), lbl:'Pending', c:'var(--yellow)'},
+      {val: (stats.total ? Math.round(stats.resolved/stats.total*100) : 0) + '%', lbl:'Resolution Rate', c:'var(--gold)'}
+    ]}
   };
   const sc = statsCfg[u.role] || statsCfg.citizen;
   document.getElementById('statsTitle').textContent = sc.title;
@@ -305,13 +303,19 @@
     document.getElementById('editForm').style.display='block';
   }
   function hideEdit() { document.getElementById('editForm').style.display='none'; }
-  function saveProfile() {
-    u.name = document.getElementById('editName').value;
-    u.phone = document.getElementById('editPhone').value;
-    localStorage.setItem('dcmsUser', JSON.stringify(u));
-    hideEdit();
-    dcmsApplyUser();
-    showToast('Profile updated!','success');
+  async function saveProfile() {
+    try {
+      await dcmsSaveProfile({
+        name: document.getElementById('editName').value.trim(),
+        phone: document.getElementById('editPhone').value.trim()
+      });
+      hideEdit();
+      dcmsApplyUser();
+      document.getElementById('profilePhone').textContent = dcmsGetUser().phone || '—';
+      showToast('Profile saved to database!','success');
+    } catch (e) {
+      showToast(e.message || 'Could not save profile', 'error');
+    }
   }
   function chkStrength(val) {
     const fill=document.getElementById('passFill'), lbl=document.getElementById('passLabel');
@@ -319,7 +323,7 @@
     const c=[{w:'0%',c:'var(--red)',l:'Too short'},{w:'25%',c:'var(--red)',l:'Weak'},{w:'50%',c:'var(--yellow)',l:'Fair'},{w:'75%',c:'var(--gold)',l:'Good'},{w:'100%',c:'var(--green)',l:'Strong ✓'}][s];
     fill.style.width=c.w; fill.style.background=c.c; lbl.textContent=c.l; lbl.style.color=c.c;
   }
+  }
   </script>
-  <script>requireAuth(); dcmsUpdateNav();</script>
 </body>
 </html>

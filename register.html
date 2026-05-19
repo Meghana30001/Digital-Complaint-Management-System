@@ -317,35 +317,36 @@
       if (activeRole === 'officer' && !document.getElementById('regDept').value) { show('⚠ Please select your department.'); return; }
       if (activeRole === 'admin' && document.getElementById('regAdminCode').value.trim() !== 'ADMIN2024') { show('⚠ Invalid admin access code. (Demo: ADMIN2024)'); return; }
 
+      if (!pass || pass.length < 6) { show('⚠ Password must be at least 6 characters.'); return; }
+
       al.style.display='flex'; al.className='alert alert-info'; al.textContent='🔄 Creating your account…';
       btn.disabled = true;
 
-      // Build user object and store directly (works with or without backend)
-      const user = dcmsSetUser(activeRole);
-      user.name  = (fn + ' ' + ln).trim();
-      user.email = email;
-      user.phone = document.getElementById('regPhone').value.trim() || user.phone;
-      user.avatar= fn.charAt(0).toUpperCase();
-      if (activeRole === 'officer') user.dept = document.getElementById('regDept').value;
-      localStorage.setItem('dcmsUser', JSON.stringify(user));
+      const payload = {
+        name: (fn + ' ' + ln).trim(),
+        email,
+        password: pass,
+        role: activeRole,
+        phone: document.getElementById('regPhone').value.trim() || ''
+      };
+      if (activeRole === 'officer') payload.dept = document.getElementById('regDept').value;
+      if (activeRole === 'admin') payload.adminCode = document.getElementById('regAdminCode').value.trim();
 
-      // Try backend registration in background (non-blocking)
-      if (typeof dcmsApi !== 'undefined') {
-        try {
-          const result = await dcmsRegister(payload);
-          if (result.success) {
-            al.style.display='flex'; al.className='alert alert-success';
-            al.textContent='✅ Registration successful! Redirecting...';
-            setTimeout(() => window.location.href = ROLE_ROUTES[activeRole], 1000);
-          } else {
-            al.style.display='flex'; al.className='alert alert-error';
-            al.textContent = result.message || '❌ Registration failed. Please try again.';
-          }
-        } catch (err) {
-          console.error('Registration error:', err);
-          al.style.display='flex'; al.className='alert alert-error';
-          al.textContent = '❌ Registration failed: ' + err.message;
+      try {
+        const result = await dcmsRegister(payload);
+        btn.disabled = false;
+        if (result.success) {
+          al.className='alert alert-success';
+          al.textContent='✅ Registration successful! Redirecting...';
+          setTimeout(() => window.location.href = ROLE_ROUTES[activeRole], 1000);
+        } else {
+          al.className='alert alert-error';
+          al.textContent = '❌ ' + (result.message || 'Registration failed.');
         }
+      } catch (err) {
+        btn.disabled = false;
+        al.className='alert alert-error';
+        al.textContent = '❌ Registration failed: ' + err.message;
       }
     }
 

@@ -269,6 +269,6 @@
       document.getElementById('panel-' + id).classList.add('active');
     }
   </script>
-  <script>requireAuth(); dcmsUpdateNav();</script>
+  <script>(async () => { await dcmsRequirePage('admin'); })();</script>
 </body>
 </html>

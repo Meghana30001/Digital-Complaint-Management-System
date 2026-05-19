@@ -52,12 +52,93 @@ function isLoggedIn() {
 }
 
 function dcmsGetUser() {
-  // Try to get from localStorage cache (set at login time)
   try {
     const u = JSON.parse(localStorage.getItem(USER_KEY));
-    if (u) return u;
+    if (u) return enrichUser(u);
   } catch (_) {}
   return null;
+}
+
+function enrichUser(u) {
+  if (!u) return null;
+  const icons = { citizen: '👤', officer: '🏢', admin: '⚙️' };
+  const labels = { citizen: 'Citizen', officer: 'Grievance Officer', admin: 'Administrator' };
+  const since = u.createdAt
+    ? new Date(u.createdAt).toLocaleDateString('en-IN', { month: 'short', year: 'numeric' })
+    : '2024';
+  return {
+    ...u,
+    roleIcon: icons[u.role] || '👤',
+    roleLabel: labels[u.role] || u.role,
+    since,
+    avatar: u.avatar || (u.name ? u.name.charAt(0).toUpperCase() : '?')
+  };
+}
+
+function dcmsSetUserCache(user) {
+  const enriched = enrichUser(user);
+  localStorage.setItem(USER_KEY, JSON.stringify(enriched));
+  return enriched;
+}
+
+async function dcmsRefreshUser() {
+  if (typeof dcmsApi === 'undefined' || !dcmsApi.hasToken()) return dcmsGetUser();
+  try {
+    const res = await dcmsApi.getMe();
+    if (res.user) return dcmsSetUserCache(res.user);
+  } catch (e) {
+    console.warn('Could not refresh profile:', e.message);
+  }
+  return dcmsGetUser();
+}
+
+async function dcmsSaveProfile(updates) {
+  if (typeof dcmsApi !== 'undefined' && dcmsApi.hasToken()) {
+    const res = await dcmsApi.updateMe(updates);
+    return dcmsSetUserCache(res.user);
+  }
+  const u = dcmsGetUser();
+  if (!u) throw new Error('Not logged in');
+  Object.assign(u, updates);
+  return dcmsSetUserCache(u);
+}
+
+/** Fill profile / header elements across pages. */
+function dcmsApplyUser() {
+  const u = dcmsGetUser();
+  if (!u) return;
+
+  document.querySelectorAll('[data-dcms="userName"]').forEach(el => { el.textContent = u.name; });
+  document.querySelectorAll('[data-dcms="userEmail"]').forEach(el => { el.textContent = u.email; });
+  document.querySelectorAll('[data-dcms="userRole"]').forEach(el => { el.textContent = u.roleLabel; });
+  document.querySelectorAll('[data-dcms="userAvatar"]').forEach(el => { el.textContent = u.avatar; });
+
+  const map = {
+    navUserName: () => `${u.roleIcon} ${u.name}`,
+    profileName: () => u.name,
+    profileEmail: () => u.email,
+    profilePhone: () => u.phone || '—',
+    profileRole: () => u.roleLabel,
+    profileMeta: () => `${u.email} · ${u.roleIcon} ${u.roleLabel} · Member since ${u.since}`,
+    profileAvatar: () => u.avatar,
+    roleIcon: () => u.roleIcon,
+    roleLabel: () => u.roleLabel,
+    since: () => u.since
+  };
+  Object.entries(map).forEach(([id, fn]) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = fn();
+  });
+}
+
+/** Auth + optional role guard + refresh session from API. */
+async function dcmsRequirePage(...roles) {
+  if (!requireAuth()) return false;
+  if (roles.length && !requireRole(...roles)) return false;
+  await dcmsRefreshUser();
+  dcmsUpdateNav();
+  dcmsApplyUser();
+  return true;
 }
 
 function dcmsSetUser(role) {
@@ -68,8 +149,7 @@ function dcmsSetUser(role) {
     admin:   { userId:'USR-0001', name:'Admin User',  email:'admin@dcms.gov',   role:'admin',   dept:'General Admin',     phone:'+91 90000 00001', avatar:'A' }
   };
   const u = demos[role] || demos.citizen;
-  localStorage.setItem(USER_KEY, JSON.stringify(u));
-  return u;
+  return dcmsSetUserCache(u);
 }
 
 function dcmsLogout() {
@@ -141,8 +221,8 @@ async function dcmsLogin(email, password, role) {
     if (typeof dcmsApi !== 'undefined') {
       const res = await dcmsApi.login(email, password, role);
       dcmsApi.saveToken(res.token);
-      localStorage.setItem(USER_KEY, JSON.stringify(res.user));
-      return { success: true, user: res.user };
+      dcmsSetUserCache(res.user);
+      return { success: true, user: dcmsGetUser() };
     }
   } catch (err) {
     console.warn('Backend login failed, trying demo mode:', err.message);
@@ -169,15 +249,16 @@ async function dcmsRegister(payload) {
     if (typeof dcmsApi !== 'undefined') {
       const res = await dcmsApi.register(payload);
       dcmsApi.saveToken(res.token);
-      localStorage.setItem(USER_KEY, JSON.stringify(res.user));
-      return { success: true, user: res.user };
+      dcmsSetUserCache(res.user);
+      return { success: true, user: dcmsGetUser() };
     }
   } catch (err) {
     return { success: false, message: err.message };
   }
-  // Demo fallback
+  // Demo fallback when backend offline
   const u = dcmsSetUser(payload.role || 'citizen');
-  u.name  = payload.name || u.name;
-  localStorage.setItem(USER_KEY, JSON.stringify(u));
-  return { success: true, user: u, demo: true };
+  u.name = payload.name || u.name;
+  u.email = payload.email || u.email;
+  dcmsSetUserCache(u);
+  return { success: true, user: dcmsGetUser(), demo: true };
 }

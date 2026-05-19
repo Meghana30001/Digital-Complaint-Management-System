@@ -15,6 +15,7 @@ router.route('/')
   .post(restrictTo('citizen'), C.createComplaint);
 
 router.get('/stats', C.getStats);
+router.get('/analytics', C.getAnalytics);
 
 router.route('/:id')
   .get(C.getComplaint)

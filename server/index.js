@@ -5,6 +5,7 @@ const connectDB  = require('./config/db');
 
 const authRoutes      = require('./routes/auth');
 const complaintRoutes = require('./routes/complaints');
+const userRoutes      = require('./routes/users');
 
 // ── Connect to MongoDB ─────────────────────────────────────
 connectDB();
@@ -32,6 +33,7 @@ if (process.env.NODE_ENV !== 'production') {
 // ── Routes ─────────────────────────────────────────────────
 app.use('/api/auth',       authRoutes);
 app.use('/api/complaints', complaintRoutes);
+app.use('/api/users',      userRoutes);
 
 // ── Health check ───────────────────────────────────────────
 app.get('/api/health', (_req, res) =>

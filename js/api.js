@@ -1,91 +1,89 @@
 /**
  * js/api.js — DCMS Frontend API Service Layer
- * All fetch() calls to the Express backend.
- * Automatically attaches JWT from localStorage.
+ * All fetch() calls to the Express + MongoDB backend.
  */
 
-const API_BASE = 'http://localhost:5005/api';
+const API_BASE = window.DCMS_API_BASE || 'http://localhost:5005/api';
+window.DCMS_API_BASE = API_BASE;
 
-// ── Core fetch wrapper ─────────────────────────────────────
 async function apiFetch(endpoint, options = {}) {
   const token = localStorage.getItem('dcmsToken');
   const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
   if (token) headers['Authorization'] = `Bearer ${token}`;
 
-  const res = await fetch(`${API_BASE}${endpoint}`, {
-    ...options,
-    headers
-  });
-
+  const res = await fetch(`${API_BASE}${endpoint}`, { ...options, headers });
   const data = await res.json().catch(() => ({}));
 
   if (!res.ok) {
-    const msg = data.message || `Request failed (${res.status})`;
-    throw new Error(msg);
+    throw new Error(data.message || `Request failed (${res.status})`);
   }
   return data;
 }
 
-// ── Auth ───────────────────────────────────────────────────
 const api = {
-
-  // Register a new user
   register: (payload) =>
     apiFetch('/auth/register', { method: 'POST', body: JSON.stringify(payload) }),
 
-  // Login
   login: (email, password, role) =>
     apiFetch('/auth/login', { method: 'POST', body: JSON.stringify({ email, password, role }) }),
 
-  // Get current user profile
   getMe: () => apiFetch('/auth/me'),
 
-  // Update profile
   updateMe: (updates) =>
     apiFetch('/auth/me', { method: 'PATCH', body: JSON.stringify(updates) }),
 
-  // ── Complaints ─────────────────────────────────────────
+  changePassword: (currentPassword, newPassword) =>
+    apiFetch('/auth/password', {
+      method: 'PATCH',
+      body: JSON.stringify({ currentPassword, newPassword })
+    }),
 
-  // Get complaints (role-filtered on server)
   getComplaints: (params = {}) => {
     const qs = new URLSearchParams(params).toString();
     return apiFetch(`/complaints${qs ? '?' + qs : ''}`);
   },
 
-  // Get single complaint by CMP ID (authenticated)
   getComplaint: (cmpId) => apiFetch(`/complaints/${cmpId}`),
 
-  // Public complaint tracker — no auth needed
   trackComplaint: (cmpId) =>
-    fetch(`${API_BASE}/complaints/track/${cmpId}`)
-      .then(r => r.json()),
+    fetch(`${API_BASE}/complaints/track/${encodeURIComponent(cmpId)}`).then(r => r.json()),
 
-  // File a new complaint (citizen)
   createComplaint: (data) =>
     apiFetch('/complaints', { method: 'POST', body: JSON.stringify(data) }),
 
-  // Update complaint (officer/admin: status/remarks | citizen: rating)
   updateComplaint: (cmpId, updates) =>
     apiFetch(`/complaints/${cmpId}`, { method: 'PATCH', body: JSON.stringify(updates) }),
 
-  // Delete complaint (admin only)
   deleteComplaint: (cmpId) =>
     apiFetch(`/complaints/${cmpId}`, { method: 'DELETE' }),
 
-  // Dashboard KPI stats
   getStats: () => apiFetch('/complaints/stats'),
 
-  // Health check
-  health: () => apiFetch('/health'),
+  getAnalytics: () => apiFetch('/complaints/analytics'),
 
-  // ── Token helpers ──────────────────────────────────────
+  getUsers: (params = {}) => {
+    const qs = new URLSearchParams(params).toString();
+    return apiFetch(`/users${qs ? '?' + qs : ''}`);
+  },
+
+  getUserStats: () => apiFetch('/users/stats'),
+
+  createUser: (payload) =>
+    apiFetch('/users', { method: 'POST', body: JSON.stringify(payload) }),
+
+  updateUser: (userId, updates) =>
+    apiFetch(`/users/${userId}`, { method: 'PATCH', body: JSON.stringify(updates) }),
+
+  deleteUser: (userId) =>
+    apiFetch(`/users/${userId}`, { method: 'DELETE' }),
+
+  health: () => apiFetch('/health'),
 
   saveToken: (token)  => localStorage.setItem('dcmsToken', token),
   clearToken: ()      => localStorage.removeItem('dcmsToken'),
   getToken: ()        => localStorage.getItem('dcmsToken'),
   hasToken: ()        => !!localStorage.getItem('dcmsToken'),
 
-  // Decode JWT payload (no verification — just for reading)
   decodeToken: () => {
     const token = localStorage.getItem('dcmsToken');
     if (!token) return null;
@@ -101,5 +99,4 @@ const api = {
   }
 };
 
-// Expose globally
 window.dcmsApi = api;

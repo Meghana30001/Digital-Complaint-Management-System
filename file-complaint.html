@@ -364,17 +364,25 @@
       document.getElementById('reviewDesc').textContent = desc;
     }
 
-    function submitComplaint() {
+    async function submitComplaint() {
       const title    = document.getElementById('cTitle').value.trim();
       const cat      = document.getElementById('cCategory').value;
       const priority = document.querySelector('input[name="priority"]:checked')?.value || 'medium';
       const desc     = document.getElementById('cDesc').value.trim();
       const location = document.getElementById('cLocation')?.value || '';
+      if (!title || !cat || !desc) {
+        showToast('Please fill title, category, and description.', 'warning');
+        return;
+      }
       const btn = document.getElementById('submitBtn');
       btn.disabled = true; btn.textContent = '⏳ Submitting...';
       showLoading('Filing your complaint…');
-      setTimeout(() => {
-        const complaint = dcmsAddComplaint({ title, category:cat, dept: DEPT_MAP[cat]||'General Admin', description:desc, priority, location });
+      try {
+        const complaint = await dcmsAddComplaint({
+          title, category: cat,
+          dept: DEPT_MAP[cat] || 'General Admin',
+          description: desc, priority, location
+        });
         hideLoading();
         document.querySelector('.form-step.active').style.display = 'none';
         document.getElementById('successCmpId').textContent = 'Complaint ID: #' + complaint.id;
@@ -382,7 +390,12 @@
         ss.classList.add('active');
         ss.style.animation = 'fadeIn .5s ease';
         showToast('Complaint filed! ID: #' + complaint.id, 'success');
-      }, 1500);
+      } catch (e) {
+        hideLoading();
+        btn.disabled = false;
+        btn.textContent = 'Submit Complaint →';
+        showToast(e.message || 'Failed to file complaint', 'error');
+      }
     }
 
     // File drop
@@ -404,7 +417,7 @@
     }
   </script>
   <script>
-  requireAuth(); dcmsUpdateNav();
+  (async () => { await dcmsRequirePage('citizen'); })();
   const _u = dcmsGetUser();
   if (_u) {
     const n = document.getElementById('cName');

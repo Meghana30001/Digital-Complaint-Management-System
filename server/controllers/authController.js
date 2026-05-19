@@ -1,5 +1,6 @@
 const jwt  = require('jsonwebtoken');
 const User = require('../models/User');
+const { formatUser } = require('../utils/formatUser');
 
 // Sign a JWT
 const signToken = (id) =>
@@ -8,22 +9,10 @@ const signToken = (id) =>
 // Send token + user in response
 const sendToken = (user, statusCode, res) => {
   const token = signToken(user._id);
-  // Remove password from output
-  user.password = undefined;
   res.status(statusCode).json({
     success: true,
     token,
-    user: {
-      id:       user._id,
-      userId:   user.userId,
-      name:     user.name,
-      email:    user.email,
-      role:     user.role,
-      phone:    user.phone,
-      dept:     user.dept,
-      empId:    user.empId,
-      avatar:   user.avatar || user.name.charAt(0).toUpperCase()
-    }
+    user: formatUser(user)
   });
 };
 
@@ -98,7 +87,7 @@ exports.getMe = async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
     if (!user) return res.status(404).json({ success: false, message: 'User not found.' });
-    res.json({ success: true, user });
+    res.json({ success: true, user: formatUser(user) });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Server error.' });
   }
@@ -112,7 +101,31 @@ exports.updateMe = async (req, res) => {
     allowed.forEach(k => { if (req.body[k] !== undefined) updates[k] = req.body[k]; });
 
     const user = await User.findByIdAndUpdate(req.user.id, updates, { new: true, runValidators: true });
-    res.json({ success: true, user });
+    res.json({ success: true, user: formatUser(user) });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Server error.' });
+  }
+};
+
+// ── PATCH /api/auth/password ────────────────────────────────
+exports.changePassword = async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    if (!currentPassword || !newPassword)
+      return res.status(400).json({ success: false, message: 'Current and new password are required.' });
+    if (newPassword.length < 6)
+      return res.status(400).json({ success: false, message: 'New password must be at least 6 characters.' });
+
+    const user = await User.findById(req.user.id).select('+password');
+    if (!user) return res.status(404).json({ success: false, message: 'User not found.' });
+
+    const match = await user.comparePassword(currentPassword);
+    if (!match)
+      return res.status(401).json({ success: false, message: 'Current password is incorrect.' });
+
+    user.password = newPassword;
+    await user.save();
+    res.json({ success: true, message: 'Password updated successfully.' });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Server error.' });
   }

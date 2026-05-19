@@ -126,8 +126,9 @@
           <thead>
             <tr><th>User</th><th>Role</th><th>Department</th><th>Activity</th><th>Joined</th><th>Status</th><th>Actions</th></tr>
           </thead>
-          <tbody>
-            <tr data-role="admin">
+          <tbody id="usersTbody">
+            <tr><td colspan="7" style="text-align:center;padding:24px;color:var(--text-d);">Loading users…</td></tr>
+            <tr data-role="admin" style="display:none">
               <td><div class="user-info"><div class="user-avatar av-a">A</div><div><div class="u-name">Admin User</div><div class="u-email">admin@dcms.gov.in</div></div></div></td>
               <td><span class="role-badge role-admin">⚙️ Admin</span></td><td>All Depts.</td><td>—</td><td>2024-01-01</td>
               <td><span class="status-badge status-resolved">● Active</span></td>
@@ -190,15 +191,18 @@
       <div class="modal-title" id="modalTitle">Add New User</div>
       <div class="modal-sub">Create account and assign role &amp; department.</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;">
-        <div class="form-group" style="margin:0;"><label class="form-label">First Name</label><input type="text" class="form-input" placeholder="First name"/></div>
-        <div class="form-group" style="margin:0;"><label class="form-label">Last Name</label><input type="text" class="form-input" placeholder="Last name"/></div>
+        <div class="form-group" style="margin:0;"><label class="form-label">Full Name</label><input type="text" class="form-input" id="muName" placeholder="Full name"/></div>
+        <div class="form-group" style="margin:0;"><label class="form-label">Phone</label><input type="text" class="form-input" id="muPhone" placeholder="Phone"/></div>
       </div>
-      <div class="form-group"><label class="form-label">Email Address</label><input type="email" class="form-input" placeholder="user@dcms.gov.in"/></div>
+      <div class="form-group"><label class="form-label">Email</label><input type="email" class="form-input" id="muEmail" placeholder="user@email.com"/></div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
         <div class="form-group" style="margin:0;"><label class="form-label">Role</label>
-          <select class="form-select"><option>citizen</option><option>officer</option><option>admin</option></select></div>
+          <select class="form-select" id="muRole"><option value="citizen">citizen</option><option value="officer">officer</option><option value="admin">admin</option></select></div>
+      </div>
+      <div class="form-group" id="muPassGroup"><label class="form-label">Password</label><input type="password" class="form-input" id="muPass" placeholder="Min 6 characters"/></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
         <div class="form-group" style="margin:0;"><label class="form-label">Department</label>
-          <select class="form-select"><option value="">— N/A —</option><option>Infrastructure</option><option>Billing</option><option>Roads</option><option>Utilities</option><option>Sanitation</option></select></div>
+          <select class="form-select" id="muDept"><option value="">— N/A —</option><option>Roads &amp; Transport</option><option>Utilities Dept.</option><option>Sanitation Dept.</option><option>Infrastructure Dept.</option><option>Billing &amp; Finance</option></select></div>
       </div>
       <div class="modal-footer">
         <button class="btn-ghost" onclick="closeModal()">Cancel</button>
@@ -211,20 +215,90 @@
   <script src="js/data.js"></script>
   <script src="js/main.js"></script>
   <script>
-    function openModal(title) { document.getElementById('modalTitle').textContent = title; document.getElementById('userModal').classList.add('open'); }
+    let _users = [], _editId = null, _roleFilter = 'all';
+    const roleBadge = { citizen:'<span class="role-badge role-citizen">👤 Citizen</span>', officer:'<span class="role-badge role-officer">🏢 Officer</span>', admin:'<span class="role-badge role-admin">⚙️ Admin</span>' };
+    const avCls = { citizen:'av-c', officer:'av-o', admin:'av-a' };
+
+    function renderUsers(list) {
+      const tbody = document.getElementById('usersTbody');
+      if (!list.length) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:24px;">No users found.</td></tr>'; return; }
+      tbody.innerHTML = list.map(u => {
+        const joined = u.createdAt ? new Date(u.createdAt).toISOString().split('T')[0] : '—';
+        const act = u.role === 'citizen' ? (u.complaintCount || 0) + ' filed' : (u.dept || '—');
+        return `<tr data-role="${u.role}"><td><div class="user-info"><div class="user-avatar ${avCls[u.role]}">${u.avatar||'?'}</div><div><div class="u-name">${u.name}</div><div class="u-email">${u.email}</div></div></div></td>
+          <td>${roleBadge[u.role]}</td><td>${u.dept||'—'}</td><td>${act}</td><td>${joined}</td>
+          <td><span class="status-badge status-resolved">● Active</span></td>
+          <td><button class="act-btn" onclick="openEdit('${u.userId}')">✏️</button><button class="act-btn del" onclick="confirmDel('${u.userId}')">🗑️</button></td></tr>`
+          .replace(/<motion/g,'<div').replace(/<\/motion>/g,'</div>');
+      }).join('');
+      document.querySelector('.tbl-footer span').textContent = 'Showing ' + list.length + ' users';
+    }
+
+    async function loadUsers() {
+      if (!await dcmsRequirePage('admin')) return;
+      try {
+        const [res, st] = await Promise.all([dcmsApi.getUsers(), dcmsApi.getUserStats()]);
+        _users = res.users || [];
+        renderUsers(_users);
+        const cards = document.querySelectorAll('[data-target]');
+        if (cards[0]) { cards[0].textContent = st.stats.citizen; cards[0].dataset.target = st.stats.citizen; }
+        if (cards[1]) { cards[1].textContent = st.stats.officer; cards[1].dataset.target = st.stats.officer; }
+        if (cards[2]) { cards[2].textContent = st.stats.admin; cards[2].dataset.target = st.stats.admin; }
+      } catch (e) { showToast(e.message || 'Could not load users', 'error'); }
+    }
+
+    function openModal(title) {
+      _editId = null;
+      document.getElementById('modalTitle').textContent = title || 'Add New User';
+      ['muName','muEmail','muPhone','muPass'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+      const pg = document.getElementById('muPassGroup'); if (pg) pg.style.display = '';
+      document.getElementById('userModal').classList.add('open');
+    }
+    function openEdit(userId) {
+      const u = _users.find(x => x.userId === userId); if (!u) return;
+      _editId = userId;
+      document.getElementById('modalTitle').textContent = 'Edit — ' + u.name;
+      const set = (id,v) => { const el = document.getElementById(id); if (el) el.value = v; };
+      set('muName', u.name); set('muEmail', u.email); set('muPhone', u.phone || '');
+      set('muRole', u.role); set('muDept', u.dept || '');
+      const pg = document.getElementById('muPassGroup'); if (pg) pg.style.display = 'none';
+      document.getElementById('userModal').classList.add('open');
+    }
     function closeModal() { document.getElementById('userModal').classList.remove('open'); }
-    function saveUser() { closeModal(); showToast('User saved successfully!', 'success'); }
-    function confirmDel(btn) { if(confirm('Delete this user?')) { btn.closest('tr').remove(); showToast('User deleted.', 'info'); } }
+    async function saveUser() {
+      const payload = { name: document.getElementById('muName')?.value.trim(), email: document.getElementById('muEmail')?.value.trim(),
+        phone: document.getElementById('muPhone')?.value.trim(), role: document.getElementById('muRole')?.value, dept: document.getElementById('muDept')?.value };
+      if (!payload.name || !payload.email) { showToast('Name and email required', 'warning'); return; }
+      try {
+        if (_editId) { await dcmsApi.updateUser(_editId, payload); showToast('User updated', 'success'); }
+        else {
+          payload.password = document.getElementById('muPass')?.value;
+          if (!payload.password || payload.password.length < 6) { showToast('Password min 6 chars', 'warning'); return; }
+          await dcmsApi.createUser(payload); showToast('User created', 'success');
+        }
+        closeModal(); loadUsers();
+      } catch (e) { showToast(e.message, 'error'); }
+    }
+    async function confirmDel(userId) {
+      if (!confirm('Delete this user?')) return;
+      try { await dcmsApi.deleteUser(userId); showToast('User deleted', 'info'); loadUsers(); }
+      catch (e) { showToast(e.message, 'error'); }
+    }
     function filterRole(role, btn) {
+      _roleFilter = role;
       document.querySelectorAll('.rf-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active');
-      document.querySelectorAll('#usersTable tbody tr').forEach(row => { row.style.display = (role==='all'||row.dataset.role===role)?'':'none'; });
+      applyFilters();
     }
-    function searchUsers(q) {
-      const s = q.toLowerCase();
-      document.querySelectorAll('#usersTable tbody tr').forEach(row => { row.style.display = row.textContent.toLowerCase().includes(s)?'':'none'; });
+    function searchUsers(q) { applyFilters(q); }
+    function applyFilters(q) {
+      const s = (q || '').toLowerCase();
+      const filtered = _users.filter(u => (_roleFilter === 'all' || u.role === _roleFilter) && (!s || u.name.toLowerCase().includes(s) || u.email.toLowerCase().includes(s)));
+      renderUsers(filtered);
     }
-    document.getElementById('userModal').addEventListener('click', function(e) { if(e.target===this) closeModal(); });
+    document.getElementById('userModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(); });
+    loadUsers();
   </script>
-  <script>requireAuth(); dcmsUpdateNav();</script>
 </body>
 </html>
+
+

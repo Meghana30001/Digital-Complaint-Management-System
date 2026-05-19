@@ -223,6 +223,25 @@
     function closeSave() { closeModal(); showToast('Department saved!', 'success'); }
     document.getElementById('deptModal').addEventListener('click', function(e) { if(e.target===this) closeModal(); });
   </script>
-  <script>requireAuth(); dcmsUpdateNav();</script>
+  <script>
+    (async () => {
+      if (!await dcmsRequirePage('admin', 'officer')) return;
+      const a = await dcmsGetAnalytics();
+      if (!a || !a.byDept) return;
+      const grid = document.querySelector('.dept-grid');
+      if (!grid) return;
+      const icons = { 'Roads & Transport':'🛣️', 'Utilities Dept.':'💧', 'Sanitation Dept.':'🗑️', 'Infrastructure Dept.':'🏗️', 'Billing & Finance':'💰' };
+      grid.innerHTML = a.byDept.map(d => {
+        const pct = d.total ? Math.round(d.resolved / d.total * 100) : 0;
+        return `<div class="dept-card reveal"><div class="dept-icon">${icons[d.dept]||'🏢'}</div><div class="dept-name">${d.dept}</div>
+          <div class="dept-stats"><div><div class="dept-stat-val" style="color:var(--accent);">${d.total}</div><div class="dept-stat-lbl">Total</div></div>
+          <div><div class="dept-stat-val" style="color:var(--green);">${d.pending}</div><div class="dept-stat-lbl">Pending</div></div>
+          <div><div class="dept-stat-val">${pct}%</div><div class="dept-stat-lbl">Resolved</div></div></div>
+          <div class="sla-bar"><div class="sla-fill" style="width:${pct}%;background:var(--accent);"></div></div></div>`;
+      }).join('').replace(/<motion/g,'<div').replace(/<\/motion>/g,'</div>');
+      grid.querySelectorAll('.reveal').forEach(el => el.classList.add('visible'));
+    })();
+  </script>
 </body>
 </html>
+
