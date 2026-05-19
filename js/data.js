@@ -10,13 +10,17 @@ const USE_BACKEND   = true;
 let _backendOk = null;
 
 function apiBase() {
-  return window.DCMS_API_BASE || 'http://localhost:5005/api';
+  return (window.DCMS_API_BASE || 'http://localhost:5005/api').replace(/\/$/, '');
 }
 
 async function isBackendReachable() {
   if (_backendOk !== null) return _backendOk;
+  if (typeof dcmsApi !== 'undefined' && dcmsApi.ping) {
+    _backendOk = await dcmsApi.ping();
+    return _backendOk;
+  }
   try {
-    const r = await fetch(`${apiBase()}/health`, { signal: AbortSignal.timeout(3000) });
+    const r = await fetch(`${apiBase()}/health`, { signal: AbortSignal.timeout(5000), mode: 'cors' });
     _backendOk = r.ok;
   } catch {
     _backendOk = false;

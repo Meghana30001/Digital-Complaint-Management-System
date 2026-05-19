@@ -39,7 +39,7 @@ exports.register = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Department is required for officers.' });
 
     const user = await User.create({
-      name, email, password,
+      name, email: email.trim().toLowerCase(), password,
       role:   role || 'citizen',
       phone:  phone || '',
       dept:   dept  || '',

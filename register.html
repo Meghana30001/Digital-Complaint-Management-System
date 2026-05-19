@@ -329,7 +329,10 @@
         role: activeRole,
         phone: document.getElementById('regPhone').value.trim() || ''
       };
-      if (activeRole === 'officer') payload.dept = document.getElementById('regDept').value;
+      if (activeRole === 'officer') {
+        payload.dept = document.getElementById('regDept').value;
+        payload.empId = document.getElementById('regEmpId')?.value.trim() || '';
+      }
       if (activeRole === 'admin') payload.adminCode = document.getElementById('regAdminCode').value.trim();
 
       try {
@@ -349,6 +352,17 @@
         al.textContent = '❌ Registration failed: ' + err.message;
       }
     }
+
+    // Check API is reachable when page loads
+    (async function checkApi() {
+      const al = document.getElementById('regAlert');
+      const ok = await dcmsApi.ping();
+      if (!ok) {
+        al.style.display = 'flex';
+        al.className = 'alert alert-error';
+        al.textContent = '⚠ Backend not running. In a terminal run: cd server → npm run dev. Then open this site at http://localhost:8080/register.html';
+      }
+    })();
 
     // Canvas particle network
     (function(){

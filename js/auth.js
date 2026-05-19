@@ -215,50 +215,42 @@ function dcmsUpdateNav() {
 }
 
 // ── Login handler (called from login.html) ────────────────
-async function dcmsLogin(email, password, role) {
+async function dcmsLogin(email, password, role, { allowDemoFallback = false } = {}) {
   try {
-    // Try real backend first
-    if (typeof dcmsApi !== 'undefined') {
-      const res = await dcmsApi.login(email, password, role);
-      dcmsApi.saveToken(res.token);
-      dcmsSetUserCache(res.user);
-      return { success: true, user: dcmsGetUser() };
-    }
+    const res = await dcmsApi.login(email, password, role);
+    dcmsApi.saveToken(res.token);
+    dcmsSetUserCache(res.user);
+    return { success: true, user: dcmsGetUser() };
   } catch (err) {
-    console.warn('Backend login failed, trying demo mode:', err.message);
+    if (allowDemoFallback) {
+      const demos = {
+        citizen: { email: 'john@example.com', password: 'citizen123' },
+        officer: { email: 'riya@dcms.gov', password: 'officer123' },
+        admin:   { email: 'admin@dcms.gov', password: 'admin123' }
+      };
+      const demo = demos[role];
+      if (demo && email === demo.email && password === demo.password) {
+        dcmsSetUser(role);
+        return { success: true, user: dcmsGetUser(), demo: true };
+      }
+    }
+    return { success: false, message: err.message || 'Login failed.' };
   }
-
-  // Demo mode fallback (when backend is offline)
-  const demos = {
-    citizen: { email: 'john@example.com',   password: 'citizen123' },
-    officer: { email: 'riya@dcms.gov',      password: 'officer123' },
-    admin:   { email: 'admin@dcms.gov',     password: 'admin123'   }
-  };
-  const demo = demos[role];
-  if (demo && email === demo.email && password === demo.password) {
-    dcmsSetUser(role);
-    return { success: true, user: dcmsGetUser(), demo: true };
-  }
-
-  return { success: false, message: 'Invalid credentials. (Demo: use demo account buttons)' };
 }
 
 // ── Register handler (called from register.html) ──────────
 async function dcmsRegister(payload) {
   try {
-    if (typeof dcmsApi !== 'undefined') {
-      const res = await dcmsApi.register(payload);
-      dcmsApi.saveToken(res.token);
-      dcmsSetUserCache(res.user);
-      return { success: true, user: dcmsGetUser() };
-    }
+    const body = {
+      ...payload,
+      email: (payload.email || '').trim().toLowerCase(),
+      role: payload.role || 'citizen'
+    };
+    const res = await dcmsApi.register(body);
+    dcmsApi.saveToken(res.token);
+    dcmsSetUserCache(res.user);
+    return { success: true, user: dcmsGetUser() };
   } catch (err) {
-    return { success: false, message: err.message };
+    return { success: false, message: err.message || 'Registration failed.' };
   }
-  // Demo fallback when backend offline
-  const u = dcmsSetUser(payload.role || 'citizen');
-  u.name = payload.name || u.name;
-  u.email = payload.email || u.email;
-  dcmsSetUserCache(u);
-  return { success: true, user: dcmsGetUser(), demo: true };
 }

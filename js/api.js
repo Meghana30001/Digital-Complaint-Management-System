@@ -1,17 +1,53 @@
 /**
  * js/api.js — DCMS Frontend API Service Layer
- * All fetch() calls to the Express + MongoDB backend.
  */
 
-const API_BASE = window.DCMS_API_BASE || 'http://localhost:5005/api';
+function resolveApiBase() {
+  if (window.DCMS_API_BASE) return window.DCMS_API_BASE.replace(/\/$/, '');
+
+  const host = window.location.hostname;
+  const isLocal = host === 'localhost' || host === '127.0.0.1' || host === '';
+
+  if (isLocal) {
+    return `http://${host || 'localhost'}:5005/api`;
+  }
+
+  // Deployed static site (e.g. Vercel) — set your hosted API URL here after deploying the server
+  if (host.includes('vercel.app') && window.DCMS_PROD_API) {
+    return window.DCMS_PROD_API.replace(/\/$/, '');
+  }
+
+  return `http://localhost:5005/api`;
+}
+
+const API_BASE = resolveApiBase();
 window.DCMS_API_BASE = API_BASE;
+
+function formatFetchError(err) {
+  const msg = (err && err.message) ? err.message : String(err);
+  if (err instanceof TypeError || /failed to fetch|network|load failed/i.test(msg)) {
+    return `Cannot reach the API at ${API_BASE}. Start the backend: open a terminal, run "cd server" then "npm run dev", and keep this page on http://localhost:8080 (not file://).`;
+  }
+  return msg;
+}
 
 async function apiFetch(endpoint, options = {}) {
   const token = localStorage.getItem('dcmsToken');
   const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
   if (token) headers['Authorization'] = `Bearer ${token}`;
 
-  const res = await fetch(`${API_BASE}${endpoint}`, { ...options, headers });
+  let res;
+  try {
+    res = await fetch(`${API_BASE}${endpoint}`, {
+      ...options,
+      headers,
+      mode: 'cors',
+      credentials: 'omit'
+    });
+  } catch (err) {
+    throw new Error(formatFetchError(err));
+  }
+
   const data = await res.json().catch(() => ({}));
 
   if (!res.ok) {
@@ -21,11 +57,16 @@ async function apiFetch(endpoint, options = {}) {
 }
 
 const api = {
+  getBaseUrl: () => API_BASE,
+
   register: (payload) =>
     apiFetch('/auth/register', { method: 'POST', body: JSON.stringify(payload) }),
 
   login: (email, password, role) =>
-    apiFetch('/auth/login', { method: 'POST', body: JSON.stringify({ email, password, role }) }),
+    apiFetch('/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ email: email.trim().toLowerCase(), password, role })
+    }),
 
   getMe: () => apiFetch('/auth/me'),
 
@@ -45,8 +86,16 @@ const api = {
 
   getComplaint: (cmpId) => apiFetch(`/complaints/${cmpId}`),
 
-  trackComplaint: (cmpId) =>
-    fetch(`${API_BASE}/complaints/track/${encodeURIComponent(cmpId)}`).then(r => r.json()),
+  trackComplaint: async (cmpId) => {
+    try {
+      const res = await fetch(`${API_BASE}/complaints/track/${encodeURIComponent(cmpId)}`, {
+        mode: 'cors'
+      });
+      return res.json();
+    } catch (err) {
+      throw new Error(formatFetchError(err));
+    }
+  },
 
   createComplaint: (data) =>
     apiFetch('/complaints', { method: 'POST', body: JSON.stringify(data) }),
@@ -78,6 +127,15 @@ const api = {
     apiFetch(`/users/${userId}`, { method: 'DELETE' }),
 
   health: () => apiFetch('/health'),
+
+  ping: async () => {
+    try {
+      await api.health();
+      return true;
+    } catch {
+      return false;
+    }
+  },
 
   saveToken: (token)  => localStorage.setItem('dcmsToken', token),
   clearToken: ()      => localStorage.removeItem('dcmsToken'),

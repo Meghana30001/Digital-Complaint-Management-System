@@ -266,6 +266,16 @@
     let activeRole = 'citizen';
     const roleRoutes = {citizen:'citizen-dashboard.html', officer:'officer-dashboard.html', admin:'dashboard.html'};
 
+    (async function checkApi() {
+      const al = document.getElementById('loginAlert');
+      const ok = await dcmsApi.ping();
+      if (!ok) {
+        al.style.display = 'flex';
+        al.className = 'alert alert-error';
+        al.textContent = '⚠ Backend not running. Run: cd server → npm run dev. Open site at http://localhost:8080 (not file:// or Vercel only).';
+      }
+    })();
+
     function setRole(el, role) {
       document.querySelectorAll('.role-tab').forEach(t => t.classList.remove('active'));
       el.classList.add('active'); activeRole = role;
@@ -285,7 +295,7 @@
       al.style.display='flex'; al.className='alert alert-info';
       al.textContent='🔄 Signing you in…';
       try {
-        const result = await dcmsLogin(email, pass, activeRole);
+        const result = await dcmsLogin(email, pass, activeRole, { allowDemoFallback: false });
         if (result.success) {
           al.className='alert alert-info';
           al.textContent='✅ Login successful! Redirecting…';
@@ -320,7 +330,7 @@
       const email = document.getElementById('loginEmail').value;
       const password = document.getElementById('loginPass').value;
       
-      dcmsLogin(email, password, role).then(result => {
+      dcmsLogin(email, password, role, { allowDemoFallback: true }).then(result => {
         if (result.success) {
           al.style.display='flex'; al.className='alert alert-success';
           al.textContent='✅ Login successful! Redirecting...';
