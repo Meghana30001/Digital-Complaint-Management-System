@@ -12,12 +12,12 @@ function resolveApiBase() {
     return `http://${host || 'localhost'}:5005/api`;
   }
 
-  // Deployed static site (e.g. Vercel) — set your hosted API URL here after deploying the server
-  if (host.includes('vercel.app') && window.DCMS_PROD_API) {
+  // Deployed site — use js/config.js (DCMS_PROD_API)
+  if (window.DCMS_PROD_API) {
     return window.DCMS_PROD_API.replace(/\/$/, '');
   }
 
-  return `http://localhost:5005/api`;
+  return '';
 }
 
 const API_BASE = resolveApiBase();
@@ -25,8 +25,18 @@ window.DCMS_API_BASE = API_BASE;
 
 function formatFetchError(err) {
   const msg = (err && err.message) ? err.message : String(err);
+  const host = window.location.hostname;
+  const isLocal = host === 'localhost' || host === '127.0.0.1' || host === '';
+
+  if (!API_BASE && !isLocal) {
+    return 'Backend URL not set. Open js/config.js, set DCMS_PROD_API to your deployed API (e.g. https://your-api.onrender.com/api), commit, and redeploy.';
+  }
+
   if (err instanceof TypeError || /failed to fetch|network|load failed/i.test(msg)) {
-    return `Cannot reach the API at ${API_BASE}. Start the backend: open a terminal, run "cd server" then "npm run dev", and keep this page on http://localhost:8080 (not file://).`;
+    if (isLocal) {
+      return `Cannot reach the API at ${API_BASE}. Start the backend: open a terminal, run "cd server" then "npm run dev", and keep this page on http://localhost:8080 (not file://).`;
+    }
+    return `Cannot reach the API at ${API_BASE}. Deploy the server/ folder (Render, Railway, etc.), set DCMS_PROD_API in js/config.js, and redeploy this site.`;
   }
   return msg;
 }

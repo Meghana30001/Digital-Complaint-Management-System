@@ -46,6 +46,15 @@ app.use('/api/auth',       authRoutes);
 app.use('/api/complaints', complaintRoutes);
 app.use('/api/users',      userRoutes);
 
+app.get('/', (_req, res) =>
+  res.json({
+    success: true,
+    message: 'DCMS API is running',
+    health: '/api/health',
+    docs: 'Use /api/auth, /api/complaints, /api/users'
+  })
+);
+
 app.get('/api/health', (_req, res) =>
   res.json({ success: true, message: 'DCMS API is running', time: new Date().toISOString() })
 );
